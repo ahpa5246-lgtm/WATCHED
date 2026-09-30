@@ -1,8 +1,9 @@
 name: Deploy GitHub Pages
 
+# Enable Settings > Pages > Build and deployment > Source: GitHub Actions,
+# then run this workflow manually. Keeping deployment manual avoids a red CI
+# status on repositories where Pages has not yet been enabled.
 on:
-  push:
-    branches: [main]
   workflow_dispatch:
 
 permissions:
