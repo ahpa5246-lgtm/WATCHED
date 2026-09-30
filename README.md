@@ -38,6 +38,10 @@ npm run build
 
 The built game is emitted to `dist/` and is a static site suitable for GitHub Pages, itch.io HTML5 hosting, Netlify, Cloudflare Pages, or any ordinary web server.
 
+### GitHub Pages preview
+
+Before the first Pages deployment, open **Settings → Pages → Build and deployment** and select **GitHub Actions** as the source. Then run the **Deploy GitHub Pages** workflow from the Actions tab. This repository keeps Pages deployment manual until that one-time repository setting is enabled.
+
 ## Commercial packaging
 
 For itch.io, run `npm run build` and upload the contents of `dist/` as an HTML5 game. Keep `index.html` at the archive root.
