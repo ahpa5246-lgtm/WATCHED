@@ -562,7 +562,9 @@ el.resetProgress.addEventListener('click', () => {
   state = createInitialState();
   logItems = []; announcedEvents.clear(); cameraSignature = '';
   el.continueGame.classList.add('hidden');
-  addLog(settings.lang === 'ar' ? 'تم مسح التقدم المحلي.' : 'Local progress cleared.');
+  el.settings.classList.add('hidden');
+  preSettingsOverlay = 'menu';
+  showOnly('menu');
 });
 
 el.language.addEventListener('change', () => { settings.lang = el.language.value; persistSettings(); applySettings(); if (!el.briefing.classList.contains('hidden')) showBriefing(); });
