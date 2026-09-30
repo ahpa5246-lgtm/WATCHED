@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#0a0a0a" />
+    <meta name="description" content="WATCHED — a short psychological surveillance game about attention, compliance, and what observation changes." />
+    <title>WATCHED</title>
+    <link rel="stylesheet" href="/src/style.css" />
+  </head>
+  <body>
+    <div id="app" class="app-shell">
+      <header class="topbar">
+        <div class="brand-lockup" aria-label="WATCHED"><span class="brand-dot" aria-hidden="true"></span><strong>WATCHED</strong><span class="build-tag">01.00</span></div>
+        <div class="top-actions"><button id="pauseBtn" class="ghost-btn" type="button" data-i18n="pause">PAUSE</button><button id="settingsBtn" class="ghost-btn" type="button" data-i18n="settings">SETTINGS</button></div>
+      </header>
+      <main class="console-grid">
+        <section class="monitor-panel" aria-label="Surveillance monitor">
+          <div class="monitor-bezel">
+            <canvas id="gameCanvas" width="1280" height="720" aria-label="Live surveillance camera feed"></canvas>
+            <div class="monitor-overlay" aria-hidden="true"><span id="camLabel">CAM 01 // OFFICE</span><span id="clockLabel">00:00:00</span><span class="rec"><i></i> REC</span></div>
+            <div id="signalLoss" class="signal-loss hidden" aria-live="polite">SIGNAL INTERRUPTED</div>
+          </div>
+          <div class="control-strip">
+            <div class="meter-block"><span class="meter-label" data-i18n="order">ORDER</span><div class="meter"><i id="orderMeter"></i></div><strong id="orderValue">50%</strong></div>
+            <div class="meter-block"><span class="meter-label" data-i18n="coverage">COVERAGE</span><div class="meter"><i id="coverageMeter"></i></div><strong id="coverageValue">0%</strong></div>
+            <div class="objective" id="objectiveText">Awaiting assignment.</div>
+          </div>
+        </section>
+        <aside class="side-panel">
+          <section class="camera-bank"><div class="section-kicker" data-i18n="cameras">CAMERAS</div><div id="cameraButtons" class="camera-buttons"></div></section>
+          <section class="subject-card" id="subjectCard">
+            <div class="section-kicker" data-i18n="subject">SUBJECT</div>
+            <div id="subjectEmpty" class="subject-empty" data-i18n="selectSubject">Select a visible subject.</div>
+            <div id="subjectInfo" class="hidden">
+              <div class="subject-heading"><strong id="subjectName">—</strong><span id="subjectId">—</span></div>
+              <dl class="subject-stats"><div><dt data-i18n="status">STATUS</dt><dd id="subjectState">—</dd></div><div><dt data-i18n="attention">ATTENTION</dt><dd id="subjectAttention">0%</dd></div><div><dt data-i18n="risk">SYSTEM RISK</dt><dd id="subjectRisk">LOW</dd></div></dl>
+              <div class="subject-actions"><button id="focusBtn" class="primary-btn" type="button" data-i18n="focus">FOCUS [E]</button><button id="flagBtn" class="danger-btn" type="button" data-i18n="flag">FLAG [F]</button></div>
+            </div>
+          </section>
+          <section class="event-log"><div class="section-kicker" data-i18n="systemLog">SYSTEM LOG</div><div id="logEntries" class="log-entries" aria-live="polite"></div></section>
+        </aside>
+      </main>
+      <footer class="statusbar"><span id="shiftLabel">SHIFT 01 / 06</span><span id="hintLabel" data-i18n="hint">Click a subject to inspect. E focuses. F flags.</span><span id="saveLabel">LOCAL RECORD // READY</span></footer>
+    </div>
+    <div id="menuOverlay" class="modal-layer"><div class="modal terminal-card"><p class="eyebrow">CIVIC OBSERVATION UNIT // OPERATOR TERMINAL</p><h1>WATCHED</h1><p class="lead" data-i18n="tagline">Observation changes behavior. Your task is to decide how much change is acceptable.</p><div class="content-note" data-i18n="contentNote">Content note: surveillance, social pressure, implied petty crime. No gore.</div><div class="menu-actions"><button id="newGameBtn" class="primary-btn large" type="button" data-i18n="newGame">NEW SHIFT</button><button id="continueBtn" class="ghost-btn large hidden" type="button" data-i18n="continue">CONTINUE</button><button id="menuSettingsBtn" class="ghost-btn large" type="button" data-i18n="settings">SETTINGS</button></div><p class="privacy-line" data-i18n="privacyLine">No account. No telemetry. Progress stays on this device.</p></div></div>
+    <div id="briefingOverlay" class="modal-layer hidden"><div class="modal briefing-card"><p id="briefingKicker" class="eyebrow">SHIFT 01</p><h2 id="briefingTitle">Calibration</h2><p id="briefingBody"></p><div id="briefingTargets" class="briefing-targets"></div><button id="startShiftBtn" class="primary-btn large" type="button" data-i18n="begin">BEGIN</button></div></div>
+    <div id="pauseOverlay" class="modal-layer hidden"><div class="modal compact-card"><p class="eyebrow" data-i18n="paused">SESSION PAUSED</p><h2 data-i18n="pauseTitle">Observation suspended.</h2><div class="menu-actions"><button id="resumeBtn" class="primary-btn large" type="button" data-i18n="resume">RESUME</button><button id="quitBtn" class="ghost-btn large" type="button" data-i18n="quit">SAVE & EXIT</button></div></div></div>
+    <div id="settingsOverlay" class="modal-layer hidden"><div class="modal settings-card"><p class="eyebrow" data-i18n="settings">SETTINGS</p><h2 data-i18n="operatorPreferences">Operator preferences</h2><label class="setting-row"><span data-i18n="language">Language</span><select id="languageSelect"><option value="en">English</option><option value="ar">العربية</option></select></label><label class="setting-row"><span data-i18n="volume">Volume</span><input id="volumeRange" type="range" min="0" max="100" value="65" /></label><label class="setting-row switch-row"><span data-i18n="scanlines">CRT scanlines</span><input id="scanlinesToggle" type="checkbox" checked /></label><label class="setting-row switch-row"><span data-i18n="reduceMotion">Reduce motion</span><input id="motionToggle" type="checkbox" /></label><div class="menu-actions"><button id="closeSettingsBtn" class="primary-btn" type="button" data-i18n="close">CLOSE</button><button id="resetProgressBtn" class="ghost-btn" type="button" data-i18n="resetProgress">RESET PROGRESS</button></div></div></div>
+    <div id="endingOverlay" class="modal-layer hidden"><div class="modal ending-card"><p class="eyebrow">OPERATOR AUDIT // FINAL</p><h2 id="endingTitle">AUDIT COMPLETE</h2><p id="endingBody" class="ending-body"></p><div id="auditGrid" class="audit-grid"></div><div class="menu-actions"><button id="restartBtn" class="primary-btn large" type="button" data-i18n="restart">NEW OPERATOR RECORD</button></div></div></div>
+    <script type="module" src="/src/game.js"></script>
+  </body>
+</html>
