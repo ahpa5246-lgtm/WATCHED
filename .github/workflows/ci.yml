@@ -15,5 +15,12 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
+      - run: node --check src/game.js && node --check src/data.js && node --check src/core/sim.js && node --check src/audio.js
       - run: npm test
       - run: npm run build
+      - uses: actions/upload-artifact@v4
+        if: github.ref == 'refs/heads/main'
+        with:
+          name: WATCHED-web-${{ github.sha }}
+          path: dist
+          if-no-files-found: error
