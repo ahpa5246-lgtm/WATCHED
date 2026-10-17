@@ -1,3 +1,4 @@
+import { sanitizeSettings } from './core/settings.js';
 import { ZONES, SHIFTS, EVENT_TEXT, TRANSLATIONS } from './data.js';
 import {
   createInitialState,
@@ -41,17 +42,21 @@ let lastSaveAt = 0;
 let logItems = [];
 let announcedEvents = new Set();
 let preSettingsOverlay = 'menu';
+let pausedBeforeSettings = false;
 let signalTimer = 0;
 let shiftTransitioning = false;
 let cameraSignature = '';
 
 function loadSettings() {
   const defaults = { lang: 'en', volume: 65, scanlines: true, reduceMotion: false };
-  try { return { ...defaults, ...JSON.parse(localStorage.getItem(SETTINGS_KEY) || '{}') }; }
+  try { return sanitizeSettings(JSON.parse(localStorage.getItem(SETTINGS_KEY) || '{}')); }
   catch { return defaults; }
 }
 
-function persistSettings() { localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings)); }
+function persistSettings() {
+  try { localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings)); }
+  catch { el.saveLabel.textContent = settings.lang === 'ar' ? 'تعذر حفظ الإعدادات' : 'SETTINGS SAVE FAILED'; }
+}
 
 function hasSave() {
   try {
@@ -121,6 +126,8 @@ function showOnly(name) {
 
 function openSettings(from = 'game') {
   preSettingsOverlay = from;
+  pausedBeforeSettings = state.paused;
+  if (from === 'game') state.paused = true;
   el.settings.classList.remove('hidden');
 }
 
@@ -553,9 +560,9 @@ el.startShift.addEventListener('click', beginShift);
 el.pauseBtn.addEventListener('click', pauseGame);
 el.resume.addEventListener('click', resumeGame);
 el.quit.addEventListener('click', backToMenu);
-el.settingsBtn.addEventListener('click', () => { state.paused = true; openSettings('game'); });
+el.settingsBtn.addEventListener('click', () => openSettings('game'));
 el.menuSettings.addEventListener('click', () => openSettings('menu'));
-el.closeSettings.addEventListener('click', () => { closeSettings(); if (preSettingsOverlay === 'game') state.paused = false; });
+el.closeSettings.addEventListener('click', () => { closeSettings(); if (preSettingsOverlay === 'game') state.paused = pausedBeforeSettings; });
 el.restart.addEventListener('click', startNewGame);
 el.resetProgress.addEventListener('click', () => {
   localStorage.removeItem(SAVE_KEY);
