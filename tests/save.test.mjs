@@ -55,3 +55,21 @@ test('records with impossible progress values are rejected', () => {
     assert.equal(decodeSaveRecord(JSON.stringify({ ...state, ...mutation })), null);
   }
 });
+
+test('records outside simulation domains are rejected', () => {
+  const state = createInitialState();
+  const firstSubject = state.subjects[0];
+
+  const invalidRecords = [
+    { ...state, selectedSubject: 'UNKNOWN' },
+    { ...state, subjects: state.subjects.map((subject) => subject.id === firstSubject.id ? { ...subject, stress: 101 } : subject) },
+    { ...state, subjects: state.subjects.map((subject) => subject.id === firstSubject.id ? { ...subject, absent: 'yes' } : subject) },
+    { ...state, zones: { ...state.zones, office: { ...state.zones.office, life: -1 } } },
+    { ...state, stats: { ...state.stats, falseFlags: -1 } },
+    { ...state, eventStates: { e1: { started: true, resolved: 'no', noticed: false, flagged: false, observedFor: 1 } } },
+  ];
+
+  for (const record of invalidRecords) {
+    assert.equal(decodeSaveRecord(JSON.stringify(record)), null);
+  }
+});
