@@ -25,7 +25,7 @@ const audio = new AudioEngine();
 const el = {
   menu: $('menuOverlay'), briefing: $('briefingOverlay'), pause: $('pauseOverlay'), settings: $('settingsOverlay'), ending: $('endingOverlay'),
   newGame: $('newGameBtn'), continueGame: $('continueBtn'), menuSettings: $('menuSettingsBtn'), settingsBtn: $('settingsBtn'), pauseBtn: $('pauseBtn'),
-  startShift: $('startShiftBtn'), resume: $('resumeBtn'), quit: $('quitBtn'), closeSettings: $('closeSettingsBtn'), resetProgress: $('resetProgressBtn'), restart: $('restartBtn'),
+  startShift: $('startShiftBtn'), resume: $('resumeBtn'), pauseSettings: $('pauseSettingsBtn'), quit: $('quitBtn'), closeSettings: $('closeSettingsBtn'), resetProgress: $('resetProgressBtn'), restart: $('restartBtn'),
   language: $('languageSelect'), volume: $('volumeRange'), scanlines: $('scanlinesToggle'), motion: $('motionToggle'),
   cameraButtons: $('cameraButtons'), subjectEmpty: $('subjectEmpty'), subjectInfo: $('subjectInfo'), subjectName: $('subjectName'), subjectId: $('subjectId'),
   subjectState: $('subjectState'), subjectAttention: $('subjectAttention'), subjectRisk: $('subjectRisk'), focusBtn: $('focusBtn'), flagBtn: $('flagBtn'),
@@ -124,12 +124,14 @@ function openSettings(from = 'game') {
   preSettingsOverlay = from;
   pausedBeforeSettings = state.paused;
   if (from === 'game') state.paused = true;
+  if (from === 'pause') el.pause.classList.add('hidden');
   el.settings.classList.remove('hidden');
 }
 
 function closeSettings() {
   el.settings.classList.add('hidden');
   if (preSettingsOverlay === 'menu') el.menu.classList.remove('hidden');
+  if (preSettingsOverlay === 'pause') el.pause.classList.remove('hidden');
 }
 
 function startNewGame() {
@@ -555,6 +557,7 @@ el.continueGame.addEventListener('click', continueGame);
 el.startShift.addEventListener('click', beginShift);
 el.pauseBtn.addEventListener('click', pauseGame);
 el.resume.addEventListener('click', resumeGame);
+el.pauseSettings.addEventListener('click', () => openSettings('pause'));
 el.quit.addEventListener('click', backToMenu);
 el.settingsBtn.addEventListener('click', () => openSettings('game'));
 el.menuSettings.addEventListener('click', () => openSettings('menu'));
@@ -598,3 +601,4 @@ applySettings();
 el.continueGame.classList.toggle('hidden', !hasSave());
 renderScene();
 requestAnimationFrame(frame);
+
