@@ -11,9 +11,9 @@ import {
   subjectRisk,
   getActiveEvents,
   classifyEnding,
-  sanitizeLoadedState,
 } from './core/sim.js';
 import { AudioEngine } from './audio.js';
+import { decodeSaveRecord } from './core/save.js';
 
 const SAVE_KEY = 'watched.save.v1';
 const SETTINGS_KEY = 'watched.settings.v1';
@@ -59,10 +59,7 @@ function persistSettings() {
 }
 
 function hasSave() {
-  try {
-    const raw = JSON.parse(localStorage.getItem(SAVE_KEY) || 'null');
-    return Boolean(raw && !raw.finished);
-  } catch { return false; }
+  return Boolean(decodeSaveRecord(localStorage.getItem(SAVE_KEY)));
 }
 
 function saveGame() {
@@ -77,12 +74,11 @@ function saveGame() {
 }
 
 function loadGame() {
-  try {
-    const raw = JSON.parse(localStorage.getItem(SAVE_KEY) || 'null');
-    state = sanitizeLoadedState(raw);
-    rebuildAnnouncementState();
-    return true;
-  } catch { return false; }
+  const restored = decodeSaveRecord(localStorage.getItem(SAVE_KEY));
+  if (!restored) return false;
+  state = restored;
+  rebuildAnnouncementState();
+  return true;
 }
 
 function rebuildAnnouncementState() {
