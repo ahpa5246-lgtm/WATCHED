@@ -117,7 +117,7 @@ html[dir="rtl"] .log-entries { padding-right: 0; padding-left: 4px; }
   .app-shell { height: 100vh; min-height: 0; overflow: hidden; }
   .console-grid { grid-template-columns: 1fr; overflow-y: auto; }
   .statusbar { flex: 0 0 auto; }
-  .side-panel { grid-template-columns: 1fr 1fr; grid-template-rows: auto auto; }
+  .side-panel { min-height: max-content; grid-template-columns: 1fr 1fr; grid-template-rows: auto auto; }
   .event-log { grid-column: 1 / -1; max-height: 220px; }
   canvas { max-height: none; }
   .monitor-bezel { min-height: 300px; }
