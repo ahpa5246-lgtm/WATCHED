@@ -1,5 +1,38 @@
 # WATCHED
 
+## Download, setup and project overview
+
+A procedural psychological surveillance game for the browser.
+
+Six shifts; camera controls; observation consequences; synthesized audio; local game progress.
+
+![Project workflow illustration](docs/project-overview.svg)
+
+### Running application
+
+![Actual browser capture at 1440 × 1000](docs/application.webp)
+
+Actual local browser capture from this maintenance pass; a screenshot alone does not verify every feature.
+
+[Download source ZIP](https://github.com/ahpa5246-lgtm/WATCHED/archive/refs/heads/main.zip) · [Changes and branches](https://github.com/ahpa5246-lgtm/WATCHED/branches) · [Verification notes](docs/QUALITY_REVIEW.md)
+
+The ZIP contains source code. Installation steps and external runtime requirements are listed below.
+
+```bash
+git clone https://github.com/ahpa5246-lgtm/WATCHED.git
+cd WATCHED
+```
+
+From the repository directory:
+
+```text
+npm install
+npm run dev
+```
+
+The diagram is a project illustration. Test results and runtime limitations are recorded in [the review](docs/QUALITY_REVIEW.md); it is not a production-readiness certification.
+
+
 A short, monochrome psychological surveillance game about attention, compliance, uncertainty, and what observation changes.
 
 **Status:** playable commercial-release candidate. The game is deliberately asset-light: all visuals are rendered procedurally in Canvas and all sound is synthesized with Web Audio, so the repository has no third-party art/audio license dependency.
