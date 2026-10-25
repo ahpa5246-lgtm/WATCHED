@@ -54,3 +54,45 @@ test('a corrupt local record never exposes Continue', async ({ page }) => {
   await expect(page.getByRole('button', { name: 'CONTINUE' })).toBeHidden();
   await expect(page.getByRole('button', { name: 'NEW SHIFT' })).toBeVisible();
 });
+
+test('narrow status remains visible while console content stays reachable', async ({ page }, testInfo) => {
+  test.skip(testInfo.project.name !== 'narrow-760', 'narrow viewport acceptance');
+
+  await page.goto('/');
+  await page.getByRole('button', { name: 'NEW SHIFT' }).click();
+  await page.getByRole('button', { name: 'BEGIN' }).click();
+
+  const viewport = page.viewportSize();
+  const status = page.locator('.statusbar');
+  const statusBox = await status.boundingBox();
+
+  expect(viewport).not.toBeNull();
+  expect(statusBox).not.toBeNull();
+  expect(statusBox.y).toBeGreaterThanOrEqual(0);
+  expect(statusBox.y + statusBox.height).toBeLessThanOrEqual(viewport.height);
+
+  const documentGeometry = await page.evaluate(() => ({
+    clientHeight: document.documentElement.clientHeight,
+    scrollHeight: document.documentElement.scrollHeight,
+  }));
+  expect(documentGeometry.scrollHeight).toBeLessThanOrEqual(documentGeometry.clientHeight);
+
+  const consoleGrid = page.locator('.console-grid');
+  const consoleGeometry = await consoleGrid.evaluate((element) => ({
+    clientHeight: element.clientHeight,
+    scrollHeight: element.scrollHeight,
+  }));
+  expect(consoleGeometry.scrollHeight).toBeGreaterThan(consoleGeometry.clientHeight);
+
+  await consoleGrid.evaluate((element) => {
+    element.scrollTop = element.scrollHeight;
+  });
+  await expect(page.locator('.event-log')).toBeInViewport();
+  await consoleGrid.evaluate((element) => {
+    element.scrollTop = 0;
+  });
+
+  await page.screenshot({
+    path: testInfo.outputPath('narrow-operator-frame.png'),
+  });
+});
