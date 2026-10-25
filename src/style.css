@@ -114,7 +114,9 @@ html[dir="rtl"] .meter-block strong, html[dir="rtl"] .subject-stats dd { text-al
 html[dir="rtl"] .log-entries { padding-right: 0; padding-left: 4px; }
 
 @media (max-width: 980px) {
-  .console-grid { grid-template-columns: 1fr; }
+  .app-shell { height: 100vh; min-height: 0; overflow: hidden; }
+  .console-grid { grid-template-columns: 1fr; overflow-y: auto; }
+  .statusbar { flex: 0 0 auto; }
   .side-panel { grid-template-columns: 1fr 1fr; grid-template-rows: auto auto; }
   .event-log { grid-column: 1 / -1; max-height: 220px; }
   canvas { max-height: none; }
