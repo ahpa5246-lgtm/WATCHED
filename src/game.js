@@ -19,6 +19,7 @@ import { decodeSaveRecord } from './core/save.js';
 const SAVE_KEY = 'watched.save.v1';
 const SETTINGS_KEY = 'watched.settings.v1';
 const $ = (id) => document.getElementById(id);
+const app = $('app');
 const canvas = $('gameCanvas');
 const ctx = canvas.getContext('2d');
 const audio = new AudioEngine();
@@ -48,6 +49,8 @@ let pausedBeforeSettings = false;
 let signalTimer = 0;
 let shiftTransitioning = false;
 let cameraSignature = '';
+let activeOverlay = null;
+let settingsReturnFocus = null;
 
 function loadSettings() {
   const defaults = { lang: 'en', volume: 65, scanlines: true, reduceMotion: false };
@@ -125,24 +128,78 @@ function refreshStaticUI() {
   el.shiftLabel.textContent = settings.lang === 'ar' ? `الوردية ${String(state.shift).padStart(2,'0')} / 06` : `SHIFT ${String(state.shift).padStart(2,'0')} / 06`;
 }
 
-function showOnly(name) {
+const FOCUSABLE_SELECTOR = 'a[href],button:not([disabled]),input:not([disabled]),select:not([disabled]),textarea:not([disabled]),[tabindex]:not([tabindex="-1"])';
+
+function focusableWithin(container) {
+  return [...container.querySelectorAll(FOCUSABLE_SELECTOR)].filter((node) =>
+    !node.closest('.hidden') && node.getAttribute('aria-hidden') !== 'true' && node.getClientRects().length > 0
+  );
+}
+
+function showOnly(name, focusTarget = null) {
   const map = { menu: el.menu, briefing: el.briefing, pause: el.pause, settings: el.settings, ending: el.ending };
   Object.values(map).forEach((node) => node.classList.add('hidden'));
-  if (name && map[name]) map[name].classList.remove('hidden');
+  const overlay = name && map[name] ? map[name] : null;
+  activeOverlay = overlay ? name : null;
+  app.inert = Boolean(overlay);
+
+  if (overlay) {
+    app.setAttribute('aria-hidden', 'true');
+    overlay.classList.remove('hidden');
+    const dialog = overlay.querySelector('[role="dialog"]');
+    const target = focusTarget && overlay.contains(focusTarget)
+      ? focusTarget
+      : focusableWithin(overlay)[0] || dialog;
+    target?.focus({ preventScroll: true });
+    return;
+  }
+
+  app.removeAttribute('aria-hidden');
+  const target = focusTarget && !focusTarget.disabled && focusTarget.getClientRects().length > 0
+    ? focusTarget
+    : focusableWithin(app)[0];
+  target?.focus({ preventScroll: true });
 }
+
+function trapOverlayTab(event) {
+  if (!activeOverlay || event.key !== 'Tab') return;
+  const map = { menu: el.menu, briefing: el.briefing, pause: el.pause, settings: el.settings, ending: el.ending };
+  const overlay = map[activeOverlay];
+  if (!overlay) return;
+  const focusable = focusableWithin(overlay);
+  if (!focusable.length) {
+    event.preventDefault();
+    overlay.querySelector('[role="dialog"]')?.focus({ preventScroll: true });
+    return;
+  }
+  const first = focusable[0];
+  const last = focusable[focusable.length - 1];
+  if (!overlay.contains(document.activeElement)) {
+    event.preventDefault();
+    (event.shiftKey ? last : first).focus({ preventScroll: true });
+  } else if (event.shiftKey && document.activeElement === first) {
+    event.preventDefault();
+    last.focus({ preventScroll: true });
+  } else if (!event.shiftKey && document.activeElement === last) {
+    event.preventDefault();
+    first.focus({ preventScroll: true });
+  }
+}
+
+document.addEventListener('keydown', trapOverlayTab, true);
 
 function openSettings(from = 'game') {
   preSettingsOverlay = from;
   pausedBeforeSettings = state.paused;
+  settingsReturnFocus = from === 'pause' ? el.pauseSettings : from === 'menu' ? el.menuSettings : el.settingsBtn;
   if (from === 'game') state.paused = true;
-  if (from === 'pause') el.pause.classList.add('hidden');
-  el.settings.classList.remove('hidden');
+  showOnly('settings');
 }
 
 function closeSettings() {
-  el.settings.classList.add('hidden');
-  if (preSettingsOverlay === 'menu') el.menu.classList.remove('hidden');
-  if (preSettingsOverlay === 'pause') el.pause.classList.remove('hidden');
+  const destination = preSettingsOverlay === 'game' ? null : preSettingsOverlay;
+  showOnly(destination, settingsReturnFocus);
+  settingsReturnFocus = null;
 }
 
 function startNewGame() {
@@ -163,7 +220,7 @@ function continueGame() {
   state.started = true;
   state.paused = false;
   cameraSignature = '';
-  showOnly(null);
+  showOnly(null, el.pauseBtn);
   addLog(settings.lang === 'ar' ? 'تمت استعادة سجل المُشغِّل.' : 'Operator record restored.');
 }
 
@@ -177,7 +234,7 @@ function showBriefing() {
   el.briefingBody.textContent = loc(shift.body);
   el.briefingTargets.innerHTML = loc(shift.targets).map((line) => `<div class="briefing-target">${escapeHtml(line)}</div>`).join('');
   el.objective.textContent = loc(shift.objective);
-  showOnly('briefing');
+  showOnly('briefing', el.startShift);
 }
 
 function beginShift() {
@@ -185,7 +242,7 @@ function beginShift() {
   state.started = true;
   state.paused = false;
   state.shiftElapsed = Math.max(0, state.shiftElapsed || 0);
-  showOnly(null);
+  showOnly(null, el.pauseBtn);
   addLog(settings.lang === 'ar' ? `بدأت الوردية ${String(state.shift).padStart(2,'0')}.` : `Shift ${String(state.shift).padStart(2,'0')} started.`);
   saveGame();
 }
@@ -235,7 +292,7 @@ function endGame() {
     [settings.lang === 'ar' ? 'مراقبة الذات' : 'SELF-OBSERVED', `${Math.round(state.stats.selfWatchSeconds)}s`],
   ];
   el.auditGrid.innerHTML = audit.map(([k,v]) => `<div class="audit-item"><span>${escapeHtml(k)}</span><strong>${escapeHtml(v)}</strong></div>`).join('');
-  showOnly('ending');
+  showOnly('ending', el.restart);
   audio.alert();
 }
 
@@ -559,10 +616,16 @@ function frame(now) {
 
 function pauseGame() {
   if (!state.started || state.finished) return;
-  state.paused = true; state.focusing = false; saveGame(); showOnly('pause');
+  state.paused = true; state.focusing = false; saveGame(); showOnly('pause', el.resume);
 }
-function resumeGame() { audio.resume(); state.paused = false; state.started = true; showOnly(null); lastFrame = performance.now(); }
-function backToMenu() { saveGame(); state.paused = true; el.continueGame.classList.toggle('hidden', !hasSave()); showOnly('menu'); }
+function resumeGame() { audio.resume(); state.paused = false; state.started = true; showOnly(null, el.pauseBtn); lastFrame = performance.now(); }
+function backToMenu() {
+  saveGame();
+  state.paused = true;
+  const canContinue = hasSave();
+  el.continueGame.classList.toggle('hidden', !canContinue);
+  showOnly('menu', canContinue ? el.continueGame : el.newGame);
+}
 
 canvas.addEventListener('pointerdown', (e) => { if (state.started && !state.paused) selectAtCanvas(e.clientX,e.clientY); });
 el.focusBtn.addEventListener('click', doFocus);
@@ -588,7 +651,7 @@ el.resetProgress.addEventListener('click', () => {
   el.continueGame.classList.add('hidden');
   el.settings.classList.add('hidden');
   preSettingsOverlay = 'menu';
-  showOnly('menu');
+  showOnly('menu', el.newGame);
 });
 
 el.language.addEventListener('change', () => { settings.lang = el.language.value; persistSettings(); applySettings(); if (!el.briefing.classList.contains('hidden')) showBriefing(); });
@@ -617,6 +680,7 @@ window.addEventListener('beforeunload', saveGame);
 
 applySettings();
 el.continueGame.classList.toggle('hidden', !hasSave());
+showOnly('menu', el.newGame);
 renderScene();
 requestAnimationFrame(frame);
 

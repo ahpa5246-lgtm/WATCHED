@@ -127,3 +127,68 @@ test('blocked browser storage keeps the operator usable without claiming persist
   await expect(page.locator('#saveLabel')).toHaveText('PROGRESS RESET FAILED');
   await expect(page.locator('#settingsOverlay')).toBeVisible();
 });
+
+
+test('keyboard-only operator journey contains modal focus and restores the correct task', async ({ page }, testInfo) => {
+  await page.goto('/');
+  const app = page.locator('#app');
+  const menuDialog = page.getByRole('dialog', { name: 'WATCHED' });
+
+  await expect(menuDialog).toBeVisible();
+  await expect(page.locator('#newGameBtn')).toBeFocused();
+  await expect(app).toHaveJSProperty('inert', true);
+  await expect(app).toHaveAttribute('aria-hidden', 'true');
+
+  await page.keyboard.press('Enter');
+  await expect(page.locator('#startShiftBtn')).toBeFocused();
+  await page.keyboard.press('Tab');
+  await expect(page.locator('#startShiftBtn')).toBeFocused();
+  await page.keyboard.press('Enter');
+
+  await expect(app).toHaveJSProperty('inert', false);
+  await expect(page.locator('#pauseBtn')).toBeFocused();
+  await page.keyboard.press('Escape');
+  await expect(page.locator('#resumeBtn')).toBeFocused();
+
+  await page.keyboard.press('Shift+Tab');
+  await expect(page.locator('#quitBtn')).toBeFocused();
+  await page.keyboard.press('Tab');
+  await expect(page.locator('#resumeBtn')).toBeFocused();
+  await page.keyboard.press('Tab');
+  await expect(page.locator('#pauseSettingsBtn')).toBeFocused();
+  await page.keyboard.press('Enter');
+
+  await expect(page.locator('#languageSelect')).toBeFocused();
+  await expect(app).toHaveJSProperty('inert', true);
+  await page.keyboard.press('ArrowDown');
+  await page.keyboard.press('Enter');
+  await expect(page.locator('html')).toHaveAttribute('dir', 'rtl');
+  await expect(page.locator('#languageSelect')).toBeFocused();
+  await page.screenshot({ path: testInfo.outputPath('arabic-settings-keyboard.png'), fullPage: true });
+
+  await page.keyboard.press('Shift+Tab');
+  await expect(page.locator('#resetProgressBtn')).toBeFocused();
+  await page.keyboard.press('Escape');
+  await expect(page.locator('#pauseSettingsBtn')).toBeFocused();
+  await expect(page.locator('html')).toHaveAttribute('dir', 'rtl');
+
+  await page.keyboard.press('Shift+Tab');
+  await expect(page.locator('#resumeBtn')).toBeFocused();
+  await page.keyboard.press('Enter');
+  await expect(page.locator('#pauseBtn')).toBeFocused();
+  await expect(app).toHaveJSProperty('inert', false);
+
+  await page.keyboard.press('Escape');
+  await expect(page.locator('#resumeBtn')).toBeFocused();
+  await page.keyboard.press('Tab');
+  await page.keyboard.press('Tab');
+  await expect(page.locator('#quitBtn')).toBeFocused();
+  await page.keyboard.press('Enter');
+
+  await expect(page.locator('#continueBtn')).toBeFocused();
+  await expect(menuDialog).toBeVisible();
+  await page.keyboard.press('Enter');
+  await expect(page.locator('#menuOverlay')).toBeHidden();
+  await expect(page.locator('#pauseBtn')).toBeFocused();
+  await expect(app).toHaveJSProperty('inert', false);
+});
