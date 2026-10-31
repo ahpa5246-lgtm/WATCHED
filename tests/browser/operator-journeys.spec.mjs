@@ -161,13 +161,21 @@ test('keyboard-only operator journey contains modal focus and restores the corre
   await expect(page.locator('#languageSelect')).toBeFocused();
   await expect(app).toHaveJSProperty('inert', true);
   await page.keyboard.press('ArrowDown');
-  await page.keyboard.press('Enter');
   await expect(page.locator('html')).toHaveAttribute('dir', 'rtl');
-  await expect(page.locator('#languageSelect')).toBeFocused();
+  await page.keyboard.press('Tab');
+  await expect(page.locator('#volumeRange')).toBeFocused();
   await page.screenshot({ path: testInfo.outputPath('arabic-settings-keyboard.png'), fullPage: true });
 
-  await page.keyboard.press('Shift+Tab');
+  await page.keyboard.press('Tab');
+  await expect(page.locator('#scanlinesToggle')).toBeFocused();
+  await page.keyboard.press('Tab');
+  await expect(page.locator('#motionToggle')).toBeFocused();
+  await page.keyboard.press('Tab');
+  await expect(page.locator('#closeSettingsBtn')).toBeFocused();
+  await page.keyboard.press('Tab');
   await expect(page.locator('#resetProgressBtn')).toBeFocused();
+  await page.keyboard.press('Tab');
+  await expect(page.locator('#languageSelect')).toBeFocused();
   await page.keyboard.press('Escape');
   await expect(page.locator('#pauseSettingsBtn')).toBeFocused();
   await expect(page.locator('html')).toHaveAttribute('dir', 'rtl');
