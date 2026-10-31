@@ -661,12 +661,12 @@ el.motion.addEventListener('change', () => { settings.reduceMotion = el.motion.c
 
 window.addEventListener('keydown', (e) => {
   if (e.repeat) return;
-  if (['INPUT','SELECT','TEXTAREA'].includes(document.activeElement?.tagName)) return;
   if (e.key === 'Escape') {
     if (!el.settings.classList.contains('hidden')) return el.closeSettings.click();
     if (!el.pause.classList.contains('hidden')) return resumeGame();
     return pauseGame();
   }
+  if (['INPUT','SELECT','TEXTAREA'].includes(document.activeElement?.tagName)) return;
   if (!state.started || state.paused) return;
   if (e.key.toLowerCase() === 'e') { e.preventDefault(); doFocus(); }
   if (e.key.toLowerCase() === 'f') { e.preventDefault(); doFlag(); }
