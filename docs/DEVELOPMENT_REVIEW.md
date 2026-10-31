@@ -71,3 +71,43 @@ Added unit coverage for missing keys, normal read/write/remove, a throwing stora
 
 ### Remaining limitations
 When browser storage is blocked or full, settings and progress cannot persist. The app can continue in the current page session, but a reload loses unsaved progress. The scene-art direction, Arabic/RTL browser journey, complete keyboard-only audit and six-shift balance remain separate open gates.
+
+
+## 2026-10-31 — keyboard-contained dialogs and Arabic settings
+
+### User journeys exercised
+The keyboard-only acceptance now covers:
+- New Shift → briefing → Begin, including focus placement on the only valid next action
+- active session → Escape → Pause → Settings → Arabic language selection → forward Tab traversal through every settings control → Escape → return focus to the Settings trigger
+- Pause → Resume, and Pause → Save & Exit → Continue after a persisted local save
+
+The same browser test runs at 1280×900 and 760×900. It asserts dialog semantics, aria-modal, the inert/hidden application shell, initial focus, forward and reverse focus containment, restoration to the initiating control, the RTL document direction, and the real keyboard path back into the saved session.
+
+### Bounded implementation
+All five overlays now expose named role=dialog surfaces with aria-modal=true. Opening an overlay moves focus to its first actionable control, makes the background application inert and aria-hidden, and contains Tab/Shift+Tab within the active dialog. Closing Settings restores focus to the exact control that opened it; closing Pause/Briefing/Continue returns focus to the active operator control. Escape is handled before the editable-control shortcut guard, so a focused language selector no longer traps the operator inside Settings.
+
+The native select initially exposed a test-order issue when the test attempted reverse traversal immediately after changing its option. The browser test was changed to traverse every settings control forward and verify wraparound. A subsequent RED run exposed a real defect: Escape was ignored while the select had focus because the global handler returned early for form controls. That guard was moved after Escape handling.
+
+### CI and browser evidence
+- Implementation commit: b914157ea1ec09e5a962c20f68f7289280deff46
+- GREEN PR run: https://github.com/ahpa5246-lgtm/WATCHED/actions/runs/41240937206
+- GREEN push run: https://github.com/ahpa5246-lgtm/WATCHED/actions/runs/41240932295
+- npm ci, syntax checks, npm test (13/13), production build (zero runtime dependencies), Chromium installation and Playwright all passed.
+- Browser result: 11 passed, 1 intentional desktop skip (the narrow-only viewport assertion).
+- Artifact: https://github.com/ahpa5246-lgtm/WATCHED/actions/runs/41240937206/artifacts/13057293093, 588,898 bytes, SHA-256 67f705a25d67b2cc008209cd8d3c5d26cc4e0e3df2795a8d7b2f7196f8f2ef39. Desktop and 760×900 Arabic settings screenshots, resumed-session screenshots, and the narrow operator-frame screenshot were inspected.
+- RED runs https://github.com/ahpa5246-lgtm/WATCHED/actions/runs/41240651177 and https://github.com/ahpa5246-lgtm/WATCHED/actions/runs/41240783115 are retained as test-development evidence; the latter identified the Escape/form-control defect fixed in the GREEN commit.
+
+### Comparative recheck — 2026-10-31
+- Papers, Please — official product site: https://papersplea.se/ . The released desktop/mobile game and the browser-based LCD, Please inspector tool provide a direct task-flow reference for focused inspection and consequential decisions. Its desk/document workflow is not a reason to turn WATCHED into a document-processing screen.
+- Beholder — official Steam product page: https://store.steampowered.com/app/475550/Beholder . The released surveillance narrative grounds observation in identifiable tenants, evidence gathering and reporting consequences. It remains the closer thematic comparator; its narrative/environmental context is stronger than WATCHED's current diagnostic camera feed.
+- inkle — official studio and product portfolio: https://www.inklestudios.com/ . The interactive-story portfolio and ink scripting language remain an aspirational reference for readable narrative hierarchy, not a surveillance-console layout to copy.
+- Decision: retain the single simultaneous surveillance workspace; this milestone improves dialog semantics and keyboard state transitions without splitting the camera/subject/log task or changing scene artwork. No competitor source, art, icon or layout was copied.
+
+This is a task-level comparison, not a completed screenshot-to-screenshot visual parity review. The current app screenshots still show generic stick figures, rectangular scenery, weak focal contrast and sparse subject information. The original scene/character art direction still requires owner approval. The previous Senior Skills visual gate result remains BLOCKED_UNVERIFIED_DESIGN; this run did not re-run scripts/visual_quality_gate.py because the local container could not reach GitHub to obtain a checkout. No visual-gate pass is claimed.
+
+### Remaining verification
+- Manual screen-reader testing (NVDA/VoiceOver) is not performed; automated browser focus tests do not establish WCAG conformance.
+- Full keyboard-only camera/subject selection, the complete six-shift balance, 320px reflow/zoom and mixed-direction identifiers remain open.
+- The scene-art direction and full visual comparison gate remain open; this accessibility milestone does not close them.
+
+Rollback: revert the keyboard-dialog implementation commit and this review entry on the existing PR branch. No merge or deployment.
