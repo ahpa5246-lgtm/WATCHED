@@ -1,4 +1,5 @@
 import { sanitizeSettings } from './core/settings.js';
+import { createSafeStorage } from './core/storage.js';
 import { ZONES, SHIFTS, EVENT_TEXT, TRANSLATIONS } from './data.js';
 import {
   createInitialState,
@@ -21,6 +22,7 @@ const $ = (id) => document.getElementById(id);
 const canvas = $('gameCanvas');
 const ctx = canvas.getContext('2d');
 const audio = new AudioEngine();
+const storage = createSafeStorage(() => window.localStorage);
 
 const el = {
   menu: $('menuOverlay'), briefing: $('briefingOverlay'), pause: $('pauseOverlay'), settings: $('settingsOverlay'), ending: $('endingOverlay'),
@@ -49,32 +51,41 @@ let cameraSignature = '';
 
 function loadSettings() {
   const defaults = { lang: 'en', volume: 65, scanlines: true, reduceMotion: false };
-  try { return sanitizeSettings(JSON.parse(localStorage.getItem(SETTINGS_KEY) || '{}')); }
+  const saved = storage.read(SETTINGS_KEY);
+  if (!saved.ok) return defaults;
+  try { return sanitizeSettings(JSON.parse(saved.value || '{}')); }
   catch { return defaults; }
 }
 
 function persistSettings() {
-  try { localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings)); }
-  catch { el.saveLabel.textContent = settings.lang === 'ar' ? 'تعذر حفظ الإعدادات' : 'SETTINGS SAVE FAILED'; }
+  if (!storage.write(SETTINGS_KEY, JSON.stringify(settings))) {
+    el.saveLabel.textContent = settings.lang === 'ar' ? 'تعذر حفظ الإعدادات' : 'SETTINGS SAVE FAILED';
+  }
 }
 
 function hasSave() {
-  return Boolean(decodeSaveRecord(localStorage.getItem(SAVE_KEY)));
+  const saved = storage.read(SAVE_KEY);
+  if (!saved.ok) {
+    el.saveLabel.textContent = settings.lang === 'ar' ? 'التخزين المحلي غير متاح' : 'LOCAL STORAGE UNAVAILABLE';
+    return false;
+  }
+  return Boolean(decodeSaveRecord(saved.value));
 }
 
 function saveGame() {
   if (!state.started && state.shiftElapsed === 0) return;
-  try {
-    localStorage.setItem(SAVE_KEY, JSON.stringify(state));
-    el.saveLabel.textContent = settings.lang === 'ar' ? 'السجل المحلي // محفوظ' : 'LOCAL RECORD // SAVED';
-    setTimeout(() => { el.saveLabel.textContent = settings.lang === 'ar' ? 'السجل المحلي // جاهز' : 'LOCAL RECORD // READY'; }, 1200);
-  } catch {
+  if (!storage.write(SAVE_KEY, JSON.stringify(state))) {
     el.saveLabel.textContent = settings.lang === 'ar' ? 'فشل الحفظ المحلي' : 'LOCAL SAVE FAILED';
+    return;
   }
+  el.saveLabel.textContent = settings.lang === 'ar' ? 'السجل المحلي // محفوظ' : 'LOCAL RECORD // SAVED';
+  setTimeout(() => { el.saveLabel.textContent = settings.lang === 'ar' ? 'السجل المحلي // جاهز' : 'LOCAL RECORD // READY'; }, 1200);
 }
 
 function loadGame() {
-  const restored = decodeSaveRecord(localStorage.getItem(SAVE_KEY));
+  const saved = storage.read(SAVE_KEY);
+  if (!saved.ok) return false;
+  const restored = decodeSaveRecord(saved.value);
   if (!restored) return false;
   state = restored;
   rebuildAnnouncementState();
@@ -140,7 +151,9 @@ function startNewGame() {
   logItems = [];
   announcedEvents.clear();
   cameraSignature = '';
-  localStorage.removeItem(SAVE_KEY);
+  if (!storage.remove(SAVE_KEY)) {
+    el.saveLabel.textContent = settings.lang === 'ar' ? 'تعذر مسح السجل المحلي' : 'LOCAL SAVE CLEAR FAILED';
+  }
   showBriefing();
 }
 
@@ -202,7 +215,9 @@ function endGame() {
   state.paused = false;
   state.focusing = false;
   saveGame();
-  localStorage.removeItem(SAVE_KEY);
+  if (!storage.remove(SAVE_KEY)) {
+    el.saveLabel.textContent = settings.lang === 'ar' ? 'تعذر مسح السجل المحلي' : 'LOCAL SAVE CLEAR FAILED';
+  }
   const ending = classifyEnding(state);
   const metrics = computeGlobalMetrics(state);
   const copy = endingCopy(ending);
@@ -564,7 +579,10 @@ el.menuSettings.addEventListener('click', () => openSettings('menu'));
 el.closeSettings.addEventListener('click', () => { closeSettings(); if (preSettingsOverlay === 'game') state.paused = pausedBeforeSettings; });
 el.restart.addEventListener('click', startNewGame);
 el.resetProgress.addEventListener('click', () => {
-  localStorage.removeItem(SAVE_KEY);
+  if (!storage.remove(SAVE_KEY)) {
+    el.saveLabel.textContent = settings.lang === 'ar' ? 'تعذر إعادة ضبط التقدم' : 'PROGRESS RESET FAILED';
+    return;
+  }
   state = createInitialState();
   logItems = []; announcedEvents.clear(); cameraSignature = '';
   el.continueGame.classList.add('hidden');

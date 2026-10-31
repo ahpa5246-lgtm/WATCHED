@@ -96,3 +96,34 @@ test('narrow status remains visible while console content stays reachable', asyn
     path: testInfo.outputPath('narrow-operator-frame.png'),
   });
 });
+
+test('blocked browser storage keeps the operator usable without claiming persistence', async ({ page }) => {
+  await page.addInitScript(() => {
+    const blocked = () => {
+      throw new DOMException('Storage access denied', 'SecurityError');
+    };
+    for (const method of ['getItem', 'setItem', 'removeItem']) {
+      Object.defineProperty(Storage.prototype, method, {
+        configurable: true,
+        writable: true,
+        value: blocked,
+      });
+    }
+  });
+
+  await page.goto('/');
+  await expect(page.getByRole('button', { name: 'NEW SHIFT' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'CONTINUE' })).toBeHidden();
+  await expect(page.locator('#saveLabel')).toHaveText('LOCAL STORAGE UNAVAILABLE');
+
+  await page.getByRole('button', { name: 'NEW SHIFT' }).click();
+  await page.getByRole('button', { name: 'BEGIN' }).click();
+  await expect(page.locator('#saveLabel')).toHaveText('LOCAL SAVE FAILED');
+
+  await page.getByRole('button', { name: 'PAUSE' }).click();
+  await page.locator('#pauseOverlay').getByRole('button', { name: 'SETTINGS' }).click();
+  await expect(page.locator('#settingsOverlay')).toBeVisible();
+  await page.getByRole('button', { name: 'RESET PROGRESS' }).click();
+  await expect(page.locator('#saveLabel')).toHaveText('PROGRESS RESET FAILED');
+  await expect(page.locator('#settingsOverlay')).toBeVisible();
+});

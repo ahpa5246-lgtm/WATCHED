@@ -57,3 +57,17 @@ The scene feed remains the dominant visual defect: generic silhouettes, rectangu
 
 ### Gate status
 The existing Playwright evidence verifies pause → settings → close → paused → explicit resume, save → exit → reload → Continue, corrupt-save fallback, and desktop/narrow viewport reachability. It does not verify Arabic/RTL, complete keyboard-only operation, six-shift balance, or a fully art-directed scene. The comparative visual gate remains BLOCKED; no release-readiness claim is made.
+
+## 2026-10-31 — browser-storage failure containment
+
+### Defect and scope
+The save validator rejected malformed records, but the application still accessed `localStorage` directly in startup detection, continuation, new-game cleanup, end-of-game cleanup and reset. A denied storage getter or a failing storage operation could therefore abort startup or an operator action. This is a persistence-availability defect, not a simulation-state defect.
+
+### Bounded implementation
+Added a small safe-storage adapter that distinguishes a missing key from unavailable storage and contains getter/read/write/remove exceptions. Save and settings failures remain visible in the existing status line. A failed progress reset now stops before resetting the in-memory session, so the UI does not imply that a persisted record was removed when removal failed. The application remains playable in memory when persistence is unavailable; it does not claim that progress can be restored.
+
+### Acceptance evidence
+Added unit coverage for missing keys, normal read/write/remove, a throwing storage getter, and throwing storage methods. Added a real-browser journey that denies Storage API operations and checks startup, New Shift, Begin, save-failure status, pause/settings access and reset-failure status. Remote CI and screenshot inspection are pending; no pass is claimed for this commit until the branch-head workflow and browser artifact are checked.
+
+### Remaining limitations
+When browser storage is blocked or full, settings and progress cannot persist. The app can continue in the current page session, but a reload loses unsaved progress. The scene-art direction, Arabic/RTL browser journey, complete keyboard-only audit and six-shift balance remain separate open gates.
