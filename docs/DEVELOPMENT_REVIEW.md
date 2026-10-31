@@ -42,3 +42,18 @@ Commission and approve an original scene/character art direction before changing
 
 Rollback: revert this milestone branch before merge. Do not merge or deploy automatically. Future runs must inspect open PRs and continue this branch before creating duplicate work.
 
+## 2026-10-31 — current browser evidence and competitive visual review
+
+### Bound implementation evidence
+The current branch-head browser artifact is [12586944105](https://github.com/ahpa5246-lgtm/WATCHED/actions/runs/40163649057/artifacts/12586944105), SHA-256 `32be8a226bd654e1a7408caac4f981a1c6564d8d34ecaefdf134d481b54c6294`, bound to commit `b9e8e0aaf1404f8f1a75a80de50ccc226bf770d1`. The five desktop/narrow screenshots were inspected. The desktop console keeps the camera feed, camera bank, subject panel, and event log visible; the 760×900 frame keeps the top/status bars visible and moves the stacked console into its own vertical overflow. The screenshots confirm layout and reachability, not the quality of the scene art.
+
+### Published-product comparison — 2026-10-31
+- [Papers, Please](https://papersplea.se/) — direct released inspection-workflow reference. Its official desktop screenshot gives the operator a concrete portrait, document stack, decision stamps, and a clear desk surface. WATCHED's feed currently has two generic stick figures and geometric room blocks; the operator has less environmental context and weaker visual focal points.
+- [Beholder](https://store.steampowered.com/app/475550/Beholder/) — direct released surveillance/tenant-management reference. Its official product description grounds surveillance in apartment occupants, evidence gathering, profiling, and consequential reporting. The current WATCHED screen exposes camera and subject controls but the environment still reads as a diagnostic placeholder. Steam's linked gallery images were not retrievable in this inspection, so this is a task-level comparison, not a completed screenshot-to-screenshot comparison.
+- [inkle](https://www.inklestudios.com/) — official narrative-design reference. Its published portfolio separates story worlds and interactive narrative products rather than treating all narrative information as one generic dashboard. Use this only to inform scene/story hierarchy; no art, characters, or layout are copied.
+
+### Confirmed gaps
+The scene feed remains the dominant visual defect: generic silhouettes, rectangular scenery, a uniform gray scanline treatment, and little contextual evidence. The subject panel's empty state is structurally clear, but its visual weight competes with the feed when no subject is selected. The product comparison does not justify adding decoration or rearranging the console arbitrarily. A distinct original scene/character art direction still requires owner approval before scene artwork changes.
+
+### Gate status
+The existing Playwright evidence verifies pause → settings → close → paused → explicit resume, save → exit → reload → Continue, corrupt-save fallback, and desktop/narrow viewport reachability. It does not verify Arabic/RTL, complete keyboard-only operation, six-shift balance, or a fully art-directed scene. The comparative visual gate remains BLOCKED; no release-readiness claim is made.
