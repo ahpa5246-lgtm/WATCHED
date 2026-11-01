@@ -31,7 +31,13 @@
           <section class="camera-bank"><div class="section-kicker" data-i18n="cameras">CAMERAS</div><div id="cameraButtons" class="camera-buttons"></div></section>
           <section class="subject-card" id="subjectCard">
             <div class="section-kicker" data-i18n="subject">SUBJECT</div>
-            <div id="subjectEmpty" class="subject-empty" data-i18n="selectSubject">Select a visible subject.</div>
+            <label class="subject-picker" for="subjectSelect">
+              <span data-i18n="visibleSubjects">VISIBLE SUBJECTS</span>
+              <select id="subjectSelect">
+                <option value="">Choose a visible subject.</option>
+              </select>
+            </label>
+            <div id="subjectEmpty" class="subject-empty" data-i18n="selectSubject">Choose a visible subject from the list or camera feed.</div>
             <div id="subjectInfo" class="hidden">
               <div class="subject-heading"><strong id="subjectName">—</strong><span id="subjectId">—</span></div>
               <dl class="subject-stats"><div><dt data-i18n="status">STATUS</dt><dd id="subjectState">—</dd></div><div><dt data-i18n="attention">ATTENTION</dt><dd id="subjectAttention">0%</dd></div><div><dt data-i18n="risk">SYSTEM RISK</dt><dd id="subjectRisk">LOW</dd></div></dl>
