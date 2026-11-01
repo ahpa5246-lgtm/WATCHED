@@ -30,7 +30,7 @@ const el = {
   newGame: $('newGameBtn'), continueGame: $('continueBtn'), menuSettings: $('menuSettingsBtn'), settingsBtn: $('settingsBtn'), pauseBtn: $('pauseBtn'),
   startShift: $('startShiftBtn'), resume: $('resumeBtn'), pauseSettings: $('pauseSettingsBtn'), quit: $('quitBtn'), closeSettings: $('closeSettingsBtn'), resetProgress: $('resetProgressBtn'), restart: $('restartBtn'),
   language: $('languageSelect'), volume: $('volumeRange'), scanlines: $('scanlinesToggle'), motion: $('motionToggle'),
-  cameraButtons: $('cameraButtons'), subjectEmpty: $('subjectEmpty'), subjectInfo: $('subjectInfo'), subjectName: $('subjectName'), subjectId: $('subjectId'),
+  cameraButtons: $('cameraButtons'), subjectSelect: $('subjectSelect'), subjectEmpty: $('subjectEmpty'), subjectInfo: $('subjectInfo'), subjectName: $('subjectName'), subjectId: $('subjectId'),
   subjectState: $('subjectState'), subjectAttention: $('subjectAttention'), subjectRisk: $('subjectRisk'), focusBtn: $('focusBtn'), flagBtn: $('flagBtn'),
   log: $('logEntries'), orderMeter: $('orderMeter'), coverageMeter: $('coverageMeter'), orderValue: $('orderValue'), coverageValue: $('coverageValue'),
   objective: $('objectiveText'), camLabel: $('camLabel'), clockLabel: $('clockLabel'), shiftLabel: $('shiftLabel'), saveLabel: $('saveLabel'), signalLoss: $('signalLoss'),
@@ -49,6 +49,8 @@ let pausedBeforeSettings = false;
 let signalTimer = 0;
 let shiftTransitioning = false;
 let cameraSignature = '';
+let subjectPickerSignature = '';
+let subjectPickerSelection = null;
 let activeOverlay = null;
 let settingsReturnFocus = null;
 
@@ -349,6 +351,7 @@ function renderCameraButtons() {
   const alertZones = getActiveEvents(state).map((e) => e.zone).sort().join(',');
   const signature = `${state.selectedCamera}|${state.shift}|${alertZones}|${settings.lang}`;
   if (signature === cameraSignature) return;
+  const focusedZone = document.activeElement?.closest?.('.cam-btn')?.dataset.zone || null;
   cameraSignature = signature;
   el.cameraButtons.innerHTML = '';
   for (const zone of ZONES) {
@@ -358,11 +361,17 @@ function renderCameraButtons() {
     btn.className = `cam-btn${state.selectedCamera === zone.id ? ' active' : ''}${locked ? ' locked' : ''}`;
     btn.disabled = locked;
     btn.dataset.zone = zone.id;
+    btn.setAttribute('aria-pressed', String(state.selectedCamera === zone.id));
     const activeAlert = getActiveEvents(state).some((e) => e.zone === zone.id);
     if (activeAlert) btn.classList.add('alerting');
     btn.innerHTML = `${zone.code}<span>${locked ? t('locked') : loc(zone.name)}</span>`;
     btn.addEventListener('click', () => switchCamera(zone.id));
     el.cameraButtons.appendChild(btn);
+  }
+  if (focusedZone) {
+    const replacement = [...el.cameraButtons.querySelectorAll('.cam-btn')]
+      .find((button) => button.dataset.zone === focusedZone && !button.disabled);
+    replacement?.focus({ preventScroll: true });
   }
 }
 
@@ -421,8 +430,32 @@ function doFlag() {
 }
 
 function updateSubjectPanel() {
+  const visibleSubjects = state.subjects.filter((s) => s.zone === state.selectedCamera && !s.absent);
+  const pickerSignature = `${state.selectedCamera}|${settings.lang}|${visibleSubjects.map((s) => s.id).join(',')}`;
+  if (pickerSignature !== subjectPickerSignature) {
+    el.subjectSelect.replaceChildren();
+    const placeholder = document.createElement('option');
+    placeholder.value = '';
+    placeholder.textContent = visibleSubjects.length ? t('selectSubject') : t('noVisibleSubjects');
+    el.subjectSelect.appendChild(placeholder);
+    for (const visible of visibleSubjects) {
+      const option = document.createElement('option');
+      option.value = visible.id;
+      option.textContent = `${visible.id} — ${visible.name}`;
+      el.subjectSelect.appendChild(option);
+    }
+    el.subjectSelect.disabled = visibleSubjects.length === 0;
+    subjectPickerSignature = pickerSignature;
+    subjectPickerSelection = undefined;
+  }
+  if (subjectPickerSelection !== state.selectedSubject) {
+    el.subjectSelect.value = state.selectedSubject || '';
+    subjectPickerSelection = state.selectedSubject;
+  }
+
   const subject = state.subjects.find((s) => s.id === state.selectedSubject && s.zone === state.selectedCamera);
   if (!subject) {
+    el.subjectEmpty.textContent = visibleSubjects.length ? t('selectSubject') : t('noVisibleSubjects');
     el.subjectEmpty.classList.remove('hidden');
     el.subjectInfo.classList.add('hidden');
     return;
@@ -628,6 +661,23 @@ function backToMenu() {
 }
 
 canvas.addEventListener('pointerdown', (e) => { if (state.started && !state.paused) selectAtCanvas(e.clientX,e.clientY); });
+el.subjectSelect.addEventListener('change', () => {
+  const id = el.subjectSelect.value;
+  if (!id) {
+    state.selectedSubject = null;
+    state.focusing = false;
+    updateSubjectPanel();
+    return;
+  }
+  const subject = selectSubject(state, id);
+  if (!subject) {
+    updateSubjectPanel();
+    return;
+  }
+  state.focusing = false;
+  audio.click();
+  updateSubjectPanel();
+});
 el.focusBtn.addEventListener('click', doFocus);
 el.flagBtn.addEventListener('click', doFlag);
 el.newGame.addEventListener('click', startNewGame);
