@@ -248,3 +248,59 @@ test('keyboard-only operator can switch cameras and inspect a visible subject wi
     fullPage: true,
   });
 });
+
+
+test('320px Arabic operator keeps the frame and inspection controls reachable', async ({ page }, testInfo) => {
+  test.skip(testInfo.project.name !== 'narrow-760', '320px reflow acceptance');
+
+  await page.setViewportSize({ width: 320, height: 720 });
+  await page.goto('/');
+  await page.locator('#menuSettingsBtn').click();
+  await page.locator('#languageSelect').selectOption('ar');
+  await page.locator('#closeSettingsBtn').click();
+  await page.locator('#newGameBtn').click();
+  await page.locator('#startShiftBtn').click();
+
+  await expect(page.locator('html')).toHaveAttribute('dir', 'rtl');
+
+  const geometry = await page.evaluate(() => ({
+    viewportWidth: document.documentElement.clientWidth,
+    documentWidth: document.documentElement.scrollWidth,
+  }));
+  expect(geometry.documentWidth).toBeLessThanOrEqual(geometry.viewportWidth);
+
+  const statusBar = page.locator('.statusbar');
+  const statusBox = await statusBar.boundingBox();
+  expect(statusBox).not.toBeNull();
+  expect(statusBox.x).toBeGreaterThanOrEqual(0);
+  expect(statusBox.x + statusBox.width).toBeLessThanOrEqual(geometry.viewportWidth);
+  expect(statusBox.y).toBeGreaterThanOrEqual(0);
+  expect(statusBox.y + statusBox.height).toBeLessThanOrEqual(720);
+
+  const cafe = page.locator('#cameraButtons button[data-zone="cafe"]');
+  await cafe.focus();
+  await page.keyboard.press('Enter');
+  await expect(cafe).toHaveAttribute('aria-pressed', 'true');
+
+  const subjectPicker = page.locator('#subjectSelect');
+  await subjectPicker.focus();
+  await page.keyboard.press('ArrowDown');
+  await expect(subjectPicker).toHaveValue('S-203');
+  await expect(page.locator('#subjectName')).toHaveText('Aya');
+
+  await page.locator('#focusBtn').focus();
+  await page.keyboard.press('e');
+  await expect(page.locator('#focusBtn')).toHaveAttribute('aria-pressed', 'true');
+
+  const panelBounds = await page.evaluate(() =>
+    [...document.querySelectorAll('.topbar, .monitor-panel, .side-panel, .statusbar')]
+      .filter((element) => element.getClientRects().length > 0)
+      .map((element) => {
+        const rect = element.getBoundingClientRect();
+        return { left: rect.left, right: rect.right };
+      })
+  );
+  expect(panelBounds.every((rect) => rect.left >= -1 && rect.right <= geometry.viewportWidth + 1)).toBe(true);
+
+  await page.screenshot({ path: testInfo.outputPath('320-rtl-operator-frame.png') });
+});
