@@ -177,3 +177,34 @@ Rollback: revert the eight implementation commits above on this existing PR bran
 - Keep PR #2 Draft. No merge or deployment.
 
 Rollback: revert the 320px acceptance-test commit and this review entry on the existing branch.
+
+## 2026-11-01 — announce operator state to assistive technology
+
+### User journey exercised
+New Shift → Begin → switch to CAM 02 → select visible subject Aya → enable focused observation → Pause → Settings → switch to Arabic → close Settings → Resume → enable focus again. The status is also checked on the existing keyboard-only camera/subject journey and the 320×720 Arabic reflow journey.
+
+### Bounded implementation
+- Added one visually-hidden `role="status"` region with `aria-live="polite"` and `aria-atomic="true"` beside the operator controls.
+- The existing UI now announces camera changes, the current subject and ID, no-selection/no-visible-subject states, and focused-observation on/off state in English and Arabic.
+- Announcements are emitted from actual user-action paths (camera selection, subject selection, focus, resume and return from Settings), not from the animation frame loop. The live region avoids repeated speech while the scene updates.
+- No simulation rules, shift balance, save schema, camera art, or external dependencies changed.
+
+### Current-head CI and browser evidence
+- Implementation/test commit: `bf27cafaf99143f765a60c343cfc46cc18b80198`.
+- GitHub Actions run [41348950248](https://github.com/ahpa5246-lgtm/WATCHED/actions/runs/41348950248) passed on that exact PR head.
+- `npm ci`: 0 vulnerabilities. JavaScript syntax checks passed. Node suite: 13/13 passed. Production build passed.
+- Playwright: 16 passed, 2 intentional project skips across the existing desktop 1280×900 and narrow 760×900 projects. The existing 320×720 Arabic reflow acceptance still runs within the narrow project.
+- New assertions verify the status role/live/atomic contract and the actual English and Arabic text after camera, subject, focus, pause, settings, and resume actions. The existing keyboard-only journey verifies the same announcement after ArrowDown selection and the `E` shortcut.
+- Artifact [13100462139](https://github.com/ahpa5246-lgtm/WATCHED/actions/runs/41348950248/artifacts/13100462139), 785,982 bytes, archive SHA-256 `5a073dd9545d3e64864dce6ff822f94ba7ad181b587eecc993efa1643742305e`. The 760px keyboard-selection and 320×720 Arabic screenshots were downloaded and inspected; the status itself is visually hidden, so its actual announcement content is verified through the browser DOM/ARIA assertions rather than a visible screenshot.
+
+### Comparative recheck and scope decision
+- The existing released-product comparison remains [Papers, Please](https://papersplea.se/) for focused inspection and consequential decisions, [Beholder](https://store.steampowered.com/app/475550/Beholder) for subjects grounded in identifiable environments, and [inkle](https://www.inklestudios.com/) as an aspirational narrative-hierarchy reference.
+- This milestone addresses an accessibility gap in the operator's existing camera/subject/focus journey. It does not split that continuous workspace, redesign the scene art, or claim parity with the narrative/environmental context of Beholder. No competitor art, source, icons, or layout were copied.
+
+### Remaining verification
+- Automated DOM assertions do not prove actual speech output. Manual NVDA/VoiceOver testing remains outstanding.
+- 200% zoom, mixed-direction identifiers, complete six-shift balance, and the full visual-parity gate remain unverified.
+- Generic stick-figure scenes and weak room context still require a separate original art-direction decision. This owner-level visual decision is not inferred from the current accessibility authorization.
+- Keep PR #2 Draft. No merge or deployment.
+
+Rollback: revert `bf27caf` and this review entry on the existing branch.
