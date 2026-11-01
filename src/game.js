@@ -470,6 +470,7 @@ function updateSubjectPanel() {
   const riskKey = risk >= 75 ? 'critical' : risk >= 50 ? 'high' : risk >= 28 ? 'medium' : 'low';
   el.subjectRisk.textContent = t(riskKey);
   el.focusBtn.classList.toggle('active', state.focusing);
+  el.focusBtn.setAttribute('aria-pressed', String(state.focusing));
   el.focusBtn.textContent = state.focusing ? `${t('focusing')} [E]` : t('focus');
 }
 
