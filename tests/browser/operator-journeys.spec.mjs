@@ -200,3 +200,43 @@ test('keyboard-only operator journey contains modal focus and restores the corre
   await expect(page.locator('#pauseBtn')).toBeFocused();
   await expect(app).toHaveJSProperty('inert', false);
 });
+
+test('keyboard-only operator can switch cameras and inspect a visible subject without canvas input', async ({ page }, testInfo) => {
+  await page.goto('/');
+  await page.keyboard.press('Enter');
+  await expect(page.locator('#startShiftBtn')).toBeFocused();
+  await page.keyboard.press('Enter');
+  await expect(page.locator('#pauseBtn')).toBeFocused();
+
+  await page.keyboard.press('Tab');
+  await page.keyboard.press('Tab');
+  const office = page.locator('#cameraButtons button[data-zone="office"]');
+  const cafe = page.locator('#cameraButtons button[data-zone="cafe"]');
+  await expect(office).toBeFocused();
+  await page.keyboard.press('Tab');
+  await expect(cafe).toBeFocused();
+  await page.keyboard.press('Enter');
+  await expect(cafe).toBeFocused();
+  await expect(cafe).toHaveAttribute('aria-pressed', 'true');
+
+  await page.keyboard.press('Tab');
+  await page.keyboard.press('Tab');
+  await page.keyboard.press('Tab');
+  const subjectPicker = page.locator('#subjectSelect');
+  await expect(subjectPicker).toBeFocused();
+  await expect(subjectPicker).toHaveAccessibleName('VISIBLE SUBJECTS');
+  await page.keyboard.press('ArrowDown');
+  await page.keyboard.press('Enter');
+  await expect(subjectPicker).toHaveValue('S-203');
+  await expect(page.locator('#subjectName')).toHaveText('Aya');
+  await expect(page.locator('#subjectId')).toHaveText('S-203');
+
+  await page.keyboard.press('Tab');
+  await expect(page.locator('#focusBtn')).toBeFocused();
+  await page.keyboard.press('e');
+  await expect(page.locator('#focusBtn')).toHaveClass(/active/);
+  await page.screenshot({
+    path: testInfo.outputPath(`${testInfo.project.name}-keyboard-subject-selection.png`),
+    fullPage: true,
+  });
+});
