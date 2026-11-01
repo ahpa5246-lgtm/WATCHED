@@ -147,3 +147,33 @@ This is a dated task-level comparison, not a complete screenshot-to-screenshot v
 - The generic stick-figure scene art, weak room context and sparse subject evidence still need a separate original art-direction milestone and actual visual-gate review.
 
 Rollback: revert the eight implementation commits above on this existing PR branch. No merge or deployment.
+
+
+## 2026-11-01 — 320px Arabic operator reflow acceptance
+
+### Bounded test
+- Added one real-browser acceptance journey to the existing PR #2 branch; no new branch or PR was created.
+- The journey starts at a 320×720 viewport, switches the actual app to Arabic/RTL, starts a shift, checks that document width does not exceed the viewport, and verifies the top/status bars remain within the viewport.
+- It then uses keyboard focus and Enter to switch to CAM 02, ArrowDown to select the visible subject Aya from the native picker, and the E shortcut to activate focused observation. It asserts the selected camera, subject identity, and focus state from the live UI rather than only checking that controls exist.
+- The test is run once under the existing `narrow-760` project after resizing to 320×720; the desktop project skips this narrow-only case intentionally.
+
+### Current-head CI and screenshot evidence
+- Test commit: `dc95fa832e84451f8c7fd3704d852cb0a0e7cc9c`.
+- GitHub Actions run [41321283240](https://github.com/ahpa5246-lgtm/WATCHED/actions/runs/41321283240) completed successfully on that exact PR head.
+- `npm ci`: found 0 vulnerabilities. JavaScript syntax checks and production build passed. Node suite: 13 passed, 0 failed, 0 skipped. Playwright: 14 passed, 2 intentional project skips.
+- Artifact [13089641870](https://github.com/ahpa5246-lgtm/WATCHED/actions/runs/41321283240/artifacts/13089641870), 808,453 bytes, SHA-256 `841ca15b49af621294b8941716233c54e887136df15beeeb5b81724297188f66`, is bound to the tested PR head.
+- Downloaded and inspected `320-rtl-operator-frame.png` (320×720). It shows the camera grid, Arabic visible-subject picker, selected subject metrics and Focus/Flag controls reachable in the internally scrolling console while the top bar and persistent status bar remain visible. The test measured no horizontal document overflow.
+- The same artifact retains the desktop/narrow keyboard camera-selection, Arabic settings, resumed-session, continued-session and narrow operator-frame screenshots. The earlier 1280×900 and 760×900 journeys remain green.
+
+### Design and scope decision
+- The existing released-product comparison remains [Papers, Please](https://papersplea.se/) for a focused high-consequence inspection task, [Beholder](https://store.steampowered.com/app/475550/Beholder) for surveillance subjects grounded in distinct environments, and [inkle](https://www.inklestudios.com/) as an aspirational narrative-hierarchy reference. No art, source, icon or layout was copied.
+- Decision: preserve the single simultaneous camera/subject/log workspace, and keep settings/pause as separate modal journeys. At 320px the monitor is not forced to fit beside the operator panels; the console scrolls internally so the subject controls remain reachable without hiding the persistent status bar.
+- This is responsive/interaction evidence, not a complete visual-parity or WCAG-conformance pass.
+
+### Remaining gaps
+- 200% zoom, manual NVDA/VoiceOver speech output, mixed-direction identifiers, full six-shift balance and the broader game-flow study remain unverified.
+- The procedural stick-figure feed still lacks distinct environmental context and subject evidence. A new original art direction remains a separate owner-level product decision; this technical viewport milestone does not resolve it.
+- GitHub reports the existing Node 20-targeting Actions versions are being forced to Node 24. This is a CI-maintenance warning, not a failed application check; update action versions in a separate dependency-maintenance milestone.
+- Keep PR #2 Draft. No merge or deployment.
+
+Rollback: revert the 320px acceptance-test commit and this review entry on the existing branch.
