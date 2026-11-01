@@ -80,6 +80,7 @@ body.reduce-motion .rec i { animation: none; }
 .subject-heading { display: flex; justify-content: space-between; gap: 12px; align-items: baseline; margin: 12px 0; }
 .subject-heading strong { font-size: 18px; letter-spacing: .04em; }
 .subject-heading span { color: var(--muted); font-size: 10px; }
+.subject-heading #subjectId { direction: ltr; unicode-bidi: isolate; text-align: left; }
 .subject-stats { margin: 0 0 12px; display: grid; gap: 7px; }
 .subject-stats div { display: flex; justify-content: space-between; gap: 12px; border-bottom: 1px solid #202020; padding-bottom: 5px; }
 .subject-stats dt { color: var(--muted); font-size: 10px; }

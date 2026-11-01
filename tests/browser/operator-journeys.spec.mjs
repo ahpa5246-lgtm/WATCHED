@@ -301,6 +301,17 @@ test('320px Arabic operator keeps the frame and inspection controls reachable', 
   await expect(page.locator('#subjectName')).toHaveText('Aya');
   await expect(announcement).toContainText('تم اختيار Aya');
 
+  const subjectId = page.locator('#subjectId');
+  await expect(subjectId).toHaveAttribute('dir', 'ltr');
+  const subjectIdBidi = await subjectId.evaluate((element) => {
+    const style = getComputedStyle(element);
+    return { direction: style.direction, unicodeBidi: style.unicodeBidi };
+  });
+  expect(subjectIdBidi).toEqual({ direction: 'ltr', unicodeBidi: 'isolate' });
+  const selectedOption = await subjectPicker.locator('option:checked').textContent();
+  expect(selectedOption).toContain('\u2068S-203\u2069');
+  expect(await announcement.textContent()).toContain('\u2068S-203\u2069');
+
   await page.locator('#focusBtn').focus();
   await page.keyboard.press('e');
   await expect(page.locator('#focusBtn')).toHaveAttribute('aria-pressed', 'true');

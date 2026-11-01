@@ -103,6 +103,7 @@ function rebuildAnnouncementState() {
 
 function t(key) { return TRANSLATIONS[settings.lang]?.[key] ?? TRANSLATIONS.en[key] ?? key; }
 function loc(value) { return typeof value === 'string' ? value : value?.[settings.lang] ?? value?.en ?? ''; }
+function isolateBidi(value) { return `\u2068${String(value)}\u2069`; }
 
 function announceOperatorStatus() {
   const zone = ZONES.find((item) => item.id === state.selectedCamera) || ZONES[0];
@@ -120,7 +121,7 @@ function announceOperatorStatus() {
       ? (settings.lang === 'ar' ? 'التركيز مفعّل.' : 'Focused observation enabled.')
       : (settings.lang === 'ar' ? 'التركيز متوقف.' : 'Focused observation disabled.');
     message = settings.lang === 'ar'
-      ? `الكاميرا ${cameraName}. تم اختيار ${subject.name}، المعرّف ${subject.id}. ${focusState}`
+      ? `الكاميرا ${cameraName}. تم اختيار ${subject.name}، المعرّف ${isolateBidi(subject.id)}. ${focusState}`
       : `Camera ${cameraName}. Selected ${subject.name}, ID ${subject.id}. ${focusState}`;
   }
 
@@ -472,7 +473,7 @@ function updateSubjectPanel() {
     for (const visible of visibleSubjects) {
       const option = document.createElement('option');
       option.value = visible.id;
-      option.textContent = `${visible.id} — ${visible.name}`;
+      option.textContent = `${isolateBidi(visible.id)} — ${visible.name}`;
       el.subjectSelect.appendChild(option);
     }
     el.subjectSelect.disabled = visibleSubjects.length === 0;
