@@ -222,6 +222,7 @@ test('keyboard-only operator can switch cameras and inspect a visible subject wi
   await page.keyboard.press('Tab');
   await page.keyboard.press('Tab');
   await page.keyboard.press('Tab');
+  await page.keyboard.press('Tab');
   const subjectPicker = page.locator('#subjectSelect');
   await expect(subjectPicker).toBeFocused();
   await expect(subjectPicker).toHaveAccessibleName('VISIBLE SUBJECTS');
