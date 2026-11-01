@@ -226,6 +226,12 @@ test('keyboard-only operator can switch cameras and inspect a visible subject wi
   await page.keyboard.press('Enter');
   await expect(cafe).toBeFocused();
   await expect(cafe).toHaveAttribute('aria-pressed', 'true');
+  const announcement = page.locator('#operatorAnnouncement');
+  await expect(announcement).toHaveAttribute('role', 'status');
+  await expect(announcement).toHaveAttribute('aria-live', 'polite');
+  await expect(announcement).toHaveAttribute('aria-atomic', 'true');
+  await expect(announcement).toContainText('الكاميرا');
+  await expect(announcement).toContainText('لم يتم اختيار شخص');
 
   await page.keyboard.press('Tab');
   await page.keyboard.press('Tab');
@@ -238,11 +244,14 @@ test('keyboard-only operator can switch cameras and inspect a visible subject wi
   await expect(subjectPicker).toHaveValue('S-203');
   await expect(page.locator('#subjectName')).toHaveText('Aya');
   await expect(page.locator('#subjectId')).toHaveText('S-203');
+  await expect(announcement).toContainText('تم اختيار Aya');
+  await expect(announcement).toContainText('S-203');
 
   await page.keyboard.press('Tab');
   await expect(page.locator('#focusBtn')).toBeFocused();
   await page.keyboard.press('e');
   await expect(page.locator('#focusBtn')).toHaveAttribute('aria-pressed', 'true');
+  await expect(announcement).toContainText('التركيز مفعّل');
   await page.screenshot({
     path: testInfo.outputPath(`${testInfo.project.name}-keyboard-subject-selection.png`),
     fullPage: true,
@@ -281,16 +290,21 @@ test('320px Arabic operator keeps the frame and inspection controls reachable', 
   await cafe.focus();
   await page.keyboard.press('Enter');
   await expect(cafe).toHaveAttribute('aria-pressed', 'true');
+  const announcement = page.locator('#operatorAnnouncement');
+  await expect(announcement).toContainText('الكاميرا');
+  await expect(announcement).toContainText('لم يتم اختيار شخص');
 
   const subjectPicker = page.locator('#subjectSelect');
   await subjectPicker.focus();
   await page.keyboard.press('ArrowDown');
   await expect(subjectPicker).toHaveValue('S-203');
   await expect(page.locator('#subjectName')).toHaveText('Aya');
+  await expect(announcement).toContainText('تم اختيار Aya');
 
   await page.locator('#focusBtn').focus();
   await page.keyboard.press('e');
   await expect(page.locator('#focusBtn')).toHaveAttribute('aria-pressed', 'true');
+  await expect(announcement).toContainText('التركيز مفعّل');
 
   const panelBounds = await page.evaluate(() =>
     [...document.querySelectorAll('.topbar, .monitor-panel, .side-panel, .statusbar')]
@@ -303,4 +317,33 @@ test('320px Arabic operator keeps the frame and inspection controls reachable', 
   expect(panelBounds.every((rect) => rect.left >= -1 && rect.right <= geometry.viewportWidth + 1)).toBe(true);
 
   await page.screenshot({ path: testInfo.outputPath('320-rtl-operator-frame.png') });
+});
+
+test('operator status live region announces selection and focus in English and Arabic', async ({ page }) => {
+  await page.goto('/');
+  await page.locator('#newGameBtn').click();
+  await page.locator('#startShiftBtn').click();
+
+  const announcement = page.locator('#operatorAnnouncement');
+  await expect(announcement).toHaveAttribute('role', 'status');
+  await expect(announcement).toHaveAttribute('aria-live', 'polite');
+  await expect(announcement).toHaveAttribute('aria-atomic', 'true');
+
+  await page.locator('#cameraButtons button[data-zone="cafe"]').click();
+  await expect(announcement).toContainText('Camera CAFE. No subject selected.');
+  await page.locator('#subjectSelect').selectOption('S-203');
+  await expect(announcement).toContainText('Selected Aya, ID S-203.');
+  await page.locator('#focusBtn').click();
+  await expect(announcement).toContainText('Focused observation enabled.');
+
+  await page.locator('#pauseBtn').click();
+  await page.locator('#pauseSettingsBtn').click();
+  await page.locator('#languageSelect').selectOption('ar');
+  await page.locator('#closeSettingsBtn').click();
+  await page.locator('#resumeBtn').click();
+  await expect(announcement).toContainText('تم اختيار Aya');
+  await expect(announcement).toContainText('التركيز متوقف');
+
+  await page.locator('#focusBtn').click();
+  await expect(announcement).toContainText('التركيز مفعّل');
 });

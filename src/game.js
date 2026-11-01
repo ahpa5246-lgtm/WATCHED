@@ -30,7 +30,7 @@ const el = {
   newGame: $('newGameBtn'), continueGame: $('continueBtn'), menuSettings: $('menuSettingsBtn'), settingsBtn: $('settingsBtn'), pauseBtn: $('pauseBtn'),
   startShift: $('startShiftBtn'), resume: $('resumeBtn'), pauseSettings: $('pauseSettingsBtn'), quit: $('quitBtn'), closeSettings: $('closeSettingsBtn'), resetProgress: $('resetProgressBtn'), restart: $('restartBtn'),
   language: $('languageSelect'), volume: $('volumeRange'), scanlines: $('scanlinesToggle'), motion: $('motionToggle'),
-  cameraButtons: $('cameraButtons'), subjectSelect: $('subjectSelect'), subjectEmpty: $('subjectEmpty'), subjectInfo: $('subjectInfo'), subjectName: $('subjectName'), subjectId: $('subjectId'),
+  cameraButtons: $('cameraButtons'), subjectSelect: $('subjectSelect'), operatorAnnouncement: $('operatorAnnouncement'), subjectEmpty: $('subjectEmpty'), subjectInfo: $('subjectInfo'), subjectName: $('subjectName'), subjectId: $('subjectId'),
   subjectState: $('subjectState'), subjectAttention: $('subjectAttention'), subjectRisk: $('subjectRisk'), focusBtn: $('focusBtn'), flagBtn: $('flagBtn'),
   log: $('logEntries'), orderMeter: $('orderMeter'), coverageMeter: $('coverageMeter'), orderValue: $('orderValue'), coverageValue: $('coverageValue'),
   objective: $('objectiveText'), camLabel: $('camLabel'), clockLabel: $('clockLabel'), shiftLabel: $('shiftLabel'), saveLabel: $('saveLabel'), signalLoss: $('signalLoss'),
@@ -103,6 +103,31 @@ function rebuildAnnouncementState() {
 
 function t(key) { return TRANSLATIONS[settings.lang]?.[key] ?? TRANSLATIONS.en[key] ?? key; }
 function loc(value) { return typeof value === 'string' ? value : value?.[settings.lang] ?? value?.en ?? ''; }
+
+function announceOperatorStatus() {
+  const zone = ZONES.find((item) => item.id === state.selectedCamera) || ZONES[0];
+  const cameraName = loc(zone.name);
+  const visibleSubjects = state.subjects.filter((subject) => subject.zone === state.selectedCamera && !subject.absent);
+  const subject = visibleSubjects.find((item) => item.id === state.selectedSubject);
+  let message;
+
+  if (!subject) {
+    message = visibleSubjects.length
+      ? (settings.lang === 'ar' ? `الكاميرا ${cameraName}. لم يتم اختيار شخص.` : `Camera ${cameraName}. No subject selected.`)
+      : (settings.lang === 'ar' ? `لا يوجد أشخاص ظاهرون في ${cameraName}.` : `No visible subjects in ${cameraName}.`);
+  } else {
+    const focusState = state.focusing
+      ? (settings.lang === 'ar' ? 'التركيز مفعّل.' : 'Focused observation enabled.')
+      : (settings.lang === 'ar' ? 'التركيز متوقف.' : 'Focused observation disabled.');
+    message = settings.lang === 'ar'
+      ? `الكاميرا ${cameraName}. تم اختيار ${subject.name}، المعرّف ${subject.id}. ${focusState}`
+      : `Camera ${cameraName}. Selected ${subject.name}, ID ${subject.id}. ${focusState}`;
+  }
+
+  if (el.operatorAnnouncement.textContent !== message) {
+    el.operatorAnnouncement.textContent = message;
+  }
+}
 
 function applySettings() {
   document.documentElement.lang = settings.lang;
@@ -202,6 +227,7 @@ function closeSettings() {
   const destination = preSettingsOverlay === 'game' ? null : preSettingsOverlay;
   showOnly(destination, settingsReturnFocus);
   settingsReturnFocus = null;
+  if (!destination) announceOperatorStatus();
 }
 
 function startNewGame() {
@@ -224,6 +250,7 @@ function continueGame() {
   cameraSignature = '';
   showOnly(null, el.pauseBtn);
   addLog(settings.lang === 'ar' ? 'تمت استعادة سجل المُشغِّل.' : 'Operator record restored.');
+  announceOperatorStatus();
 }
 
 function showBriefing() {
@@ -246,6 +273,7 @@ function beginShift() {
   state.shiftElapsed = Math.max(0, state.shiftElapsed || 0);
   showOnly(null, el.pauseBtn);
   addLog(settings.lang === 'ar' ? `بدأت الوردية ${String(state.shift).padStart(2,'0')}.` : `Shift ${String(state.shift).padStart(2,'0')} started.`);
+  announceOperatorStatus();
   saveGame();
 }
 
@@ -384,6 +412,7 @@ function switchCamera(id) {
     signalTimer = settings.reduceMotion ? 0 : .11;
     updateSubjectPanel();
     renderCameraButtons();
+    announceOperatorStatus();
   }
 }
 
@@ -410,12 +439,14 @@ function selectAtCanvas(clientX, clientY) {
     state.focusing = false;
   }
   updateSubjectPanel();
+  announceOperatorStatus();
 }
 
 function doFocus() {
   if (toggleFocus(state)) audio.tone(380, .05, .10);
   else audio.click();
   updateSubjectPanel();
+  announceOperatorStatus();
 }
 
 function doFlag() {
@@ -652,7 +683,7 @@ function pauseGame() {
   if (!state.started || state.finished) return;
   state.paused = true; state.focusing = false; saveGame(); showOnly('pause', el.resume);
 }
-function resumeGame() { audio.resume(); state.paused = false; state.started = true; showOnly(null, el.pauseBtn); lastFrame = performance.now(); }
+function resumeGame() { audio.resume(); state.paused = false; state.started = true; showOnly(null, el.pauseBtn); lastFrame = performance.now(); announceOperatorStatus(); }
 function backToMenu() {
   saveGame();
   state.paused = true;
@@ -668,16 +699,19 @@ el.subjectSelect.addEventListener('change', () => {
     state.selectedSubject = null;
     state.focusing = false;
     updateSubjectPanel();
+    announceOperatorStatus();
     return;
   }
   const subject = selectSubject(state, id);
   if (!subject) {
     updateSubjectPanel();
+    announceOperatorStatus();
     return;
   }
   state.focusing = false;
   audio.click();
   updateSubjectPanel();
+  announceOperatorStatus();
 });
 el.focusBtn.addEventListener('click', doFocus);
 el.flagBtn.addEventListener('click', doFlag);
