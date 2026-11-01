@@ -62,7 +62,10 @@ body.reduce-motion .rec i { animation: none; }
 .cam-btn.alerting:not(.active) { border-color: var(--danger-dim); }
 
 .subject-card { min-height: 190px; }
-.subject-empty { color: var(--muted); font-size: 12px; margin-top: 18px; line-height: 1.6; }
+.subject-picker { display: grid; gap: 6px; margin-top: 10px; color: var(--muted); font-size: 10px; letter-spacing: .12em; }
+.subject-picker select { width: 100%; min-height: 38px; padding: 8px; border: 1px solid #333; background: #111; color: var(--soft); }
+.subject-picker select:disabled { opacity: .55; cursor: not-allowed; }
+.subject-empty { color: var(--muted); font-size: 12px; margin-top: 10px; line-height: 1.6; }
 .subject-heading { display: flex; justify-content: space-between; gap: 12px; align-items: baseline; margin: 12px 0; }
 .subject-heading strong { font-size: 18px; letter-spacing: .04em; }
 .subject-heading span { color: var(--muted); font-size: 10px; }
