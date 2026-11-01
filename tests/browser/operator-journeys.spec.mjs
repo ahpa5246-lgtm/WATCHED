@@ -209,6 +209,14 @@ test('keyboard-only operator can switch cameras and inspect a visible subject wi
   await expect(page.locator('#pauseBtn')).toBeFocused();
 
   await page.keyboard.press('Tab');
+  await expect(page.locator('#settingsBtn')).toBeFocused();
+  await page.keyboard.press('Enter');
+  await expect(page.locator('#languageSelect')).toBeFocused();
+  await page.keyboard.press('ArrowDown');
+  await expect(page.locator('html')).toHaveAttribute('dir', 'rtl');
+  await page.keyboard.press('Escape');
+  await expect(page.locator('#settingsBtn')).toBeFocused();
+
   await page.keyboard.press('Tab');
   const office = page.locator('#cameraButtons button[data-zone="office"]');
   const cafe = page.locator('#cameraButtons button[data-zone="cafe"]');
@@ -225,7 +233,7 @@ test('keyboard-only operator can switch cameras and inspect a visible subject wi
   await page.keyboard.press('Tab');
   const subjectPicker = page.locator('#subjectSelect');
   await expect(subjectPicker).toBeFocused();
-  await expect(subjectPicker).toHaveAccessibleName('VISIBLE SUBJECTS');
+  await expect(subjectPicker).toHaveAccessibleName('الأشخاص الظاهرون');
   await page.keyboard.press('ArrowDown');
   await page.keyboard.press('Enter');
   await expect(subjectPicker).toHaveValue('S-203');
@@ -235,7 +243,7 @@ test('keyboard-only operator can switch cameras and inspect a visible subject wi
   await page.keyboard.press('Tab');
   await expect(page.locator('#focusBtn')).toBeFocused();
   await page.keyboard.press('e');
-  await expect(page.locator('#focusBtn')).toHaveClass(/active/);
+  await expect(page.locator('#focusBtn')).toHaveAttribute('aria-pressed', 'true');
   await page.screenshot({
     path: testInfo.outputPath(`${testInfo.project.name}-keyboard-subject-selection.png`),
     fullPage: true,
