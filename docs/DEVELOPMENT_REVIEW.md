@@ -208,3 +208,28 @@ New Shift → Begin → switch to CAM 02 → select visible subject Aya → enab
 - Keep PR #2 Draft. No merge or deployment.
 
 Rollback: revert `bf27caf` and this review entry on the existing branch.
+
+
+## 2026-11-02 — isolate subject identifiers in Arabic operator views
+
+### Observed task and bounded repair
+The existing 320×720 Arabic operator journey selected subject Aya with identifier `S-203`. In an RTL document, the identifier appears in three places with different rendering paths: the selected-subject detail, the native subject picker, and the live-region announcement. A bare Latin identifier embedded in Arabic text can be reordered with adjacent punctuation or label text.
+
+- The detail identifier now has explicit `dir="ltr"` and CSS `unicode-bidi: isolate`, with left-aligned code text.
+- The native picker option and Arabic live announcement wrap the identifier in Unicode FSI/PDI isolates. The option's actual value remains the unchanged stable ID, so selection and simulation state are unaffected.
+- The existing 320×720 Arabic/RTL journey now asserts the computed direction/isolation, selected option text, and announcement text. No simulation rules, saved-record schema, scene art, or runtime dependencies changed.
+
+### Current-head verification
+- Implementation/test commit: `49ebe256fc1fb1e12525a853af582e943531de16`.
+- Push CI [41363422946](https://github.com/ahpa5246-lgtm/WATCHED/actions/runs/41363422946) and PR CI [41363427343](https://github.com/ahpa5246-lgtm/WATCHED/actions/runs/41363427343) both completed successfully on the exact commit.
+- `npm ci`: 0 vulnerabilities. JavaScript syntax checks passed. Node suite: 13 passed, 0 failed. Production build passed.
+- Playwright: 16 passed, 2 intentional project skips. The 320×720 Arabic acceptance ran within the narrow project; desktop 1280×900 and narrow 760×900 journeys also passed.
+- Browser artifact [13106356130](https://github.com/ahpa5246-lgtm/WATCHED/actions/runs/41363427343/artifacts/13106356130), 814,729 bytes, SHA-256 `81789cffa74ffcc39efa8c1083aff654f3f7e84877e0df2eccddb6cc162addb1`, is bound to the tested commit. I downloaded and inspected `320-rtl-operator-frame.png` (320×720) and `narrow-760-keyboard-subject-selection.png` (760px). The identifier remains legible as an LTR code in the selected-subject detail and picker; the 320px page retains its no-horizontal-overflow and reachable-control assertions.
+
+### Product comparison and limits
+- [Papers, Please](https://papersplea.se/) remains the direct reference for a focused inspection task and compact status hierarchy.
+- [Beholder](https://store.steampowered.com/app/475550/Beholder) remains the direct surveillance-narrative reference for identifiable subjects and environmental context.
+- [inkle](https://www.inklestudios.com/) remains the official narrative-hierarchy reference, not a surveillance-console competitor.
+- This milestone improves directionality of operational identifiers only. It does not change the procedural scene art or information architecture. The feed still uses generic figures and geometric rooms; the original scene-art direction, manual NVDA/VoiceOver output, 200% zoom, mixed Arabic/Latin content beyond subject IDs, complete six-shift balance, and full visual-quality gate remain open. No visual-parity or WCAG-conformance claim is made.
+
+The earlier mixed-direction-subject-ID item is superseded by this tested change. Keep PR #2 Draft; no merge or deployment.
