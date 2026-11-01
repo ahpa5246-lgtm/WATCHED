@@ -107,7 +107,43 @@ This is a task-level comparison, not a completed screenshot-to-screenshot visual
 
 ### Remaining verification
 - Manual screen-reader testing (NVDA/VoiceOver) is not performed; automated browser focus tests do not establish WCAG conformance.
-- Full keyboard-only camera/subject selection, the complete six-shift balance, 320px reflow/zoom and mixed-direction identifiers remain open.
+- The camera/subject selection journey now passes with keyboard at 1280×900 and 760×900. 320px reflow/zoom, mixed-direction identifiers and the complete six-shift balance remain open.
 - The scene-art direction and full visual comparison gate remain open; this accessibility milestone does not close them.
 
 Rollback: revert the keyboard-dialog implementation commit and this review entry on the existing PR branch. No merge or deployment.
+
+
+## 2026-11-01 — keyboard-only camera and subject inspection
+
+### User journey exercised
+New Shift → briefing → Begin → Settings → Arabic language → close Settings → move through the camera controls with Tab → activate CAM 02 with Enter → continue through the camera buttons → select a visible subject with the native subject picker and ArrowDown → move to Focus with Tab → activate focused observation with E. The same journey runs in the 1280×900 desktop and 760×900 narrow Playwright projects. No canvas pointer input is used.
+
+### Bounded implementation
+- Camera controls expose their selected state through `aria-pressed`.
+- Rebuilding camera buttons after a camera change or UI refresh restores focus to the same camera control instead of returning the operator to the document body.
+- A labeled native subject selector lists only the currently visible subjects for the selected camera. It refreshes when camera, language or visible-subject membership changes, and remains synchronized with canvas selection.
+- The focus toggle exposes its state through `aria-pressed`. English and Arabic labels/hints explain the list-based selection path.
+
+This keeps camera, subject and system-log inspection in one operator workspace: those controls serve the same continuous observation task. Settings and pause remain separate modal journeys. The change does not attempt to imitate a document desk or narrative apartment interface.
+
+### CI and actual browser evidence
+- Implementation commits on the existing branch: `ced0b880`, `bdc9395f`, `51473370`, `c9768202`, `e571c159`, `f2bebda9`, `39c56e10`, `fb4beea5`.
+- Final PR run: https://github.com/ahpa5246-lgtm/WATCHED/actions/runs/41299487640 — all jobs passed.
+- `npm ci`, JavaScript syntax checks, `npm test` (13/13), production build, Chromium installation and Playwright all passed; browser result: 13 passed.
+- Artifact: https://github.com/ahpa5246-lgtm/WATCHED/actions/runs/41299487640/artifacts/13080562960, 770,269 bytes, SHA-256 `074e6b43f5966a746e297082ff432ec720c27ff0b2677bf7cfbc1bd16f54bae4`. Desktop and narrow screenshots were opened and inspected. They show the selected camera retained after Enter, the Arabic subject picker, selected subject details, and the focused observation control. At 760×900 the camera/subject panels reflow below the feed without clipping the picker or action buttons.
+- Two earlier RED runs were used to correct the test sequence, not to mask a product failure: run 41299019753 exposed an off-by-one Tab count (focus was on CAM 05); run 41299256264 showed that the test's extra Enter did not advance focus out of the native select as expected. The final test uses ArrowDown to commit the native option, then Tab to reach the Focus action. The final GREEN run is 41299487640.
+
+### Published-product comparison — 2026-11-01
+- Papers, Please — official product site: https://papersplea.se/ . Its desk/document review flow is a useful direct reference for a single high-consequence inspection task and compact status hierarchy; it is not a reason to turn WATCHED into a paperwork interface.
+- Beholder — official Steam product page and released-game screenshot gallery: https://store.steampowered.com/app/475550/Beholder and https://steamcommunity.com/app/475550/screenshots/ . Its apartment scenes give subjects a distinct environment and narrative context. The current WATCHED feed remains more abstract and less legible because the figures and rooms are generic; this keyboard milestone does not resolve the scene-art gap.
+- inkle — official studio and product portfolio: https://www.inklestudios.com/ . Retained as an aspirational reference for readable narrative hierarchy, not as a direct surveillance-interface competitor.
+- Decision: keep one simultaneous camera/subject/log workspace because these are parts of one observation task; keep settings and pause separate. Improve the task's keyboard path without copying competitor art or layout.
+
+This is a dated task-level comparison, not a complete screenshot-to-screenshot visual parity pass. The Senior Skills visual gate remains BLOCKED_UNVERIFIED_DESIGN; the gate script was not run in this environment because a local repository checkout is unavailable and the container cannot resolve GitHub. No visual-gate pass or WCAG conformance claim is made.
+
+### Remaining verification
+- Manual NVDA/VoiceOver testing remains outstanding.
+- Verify 320px reflow and 200% zoom, mixed-direction identifiers, and the full six-shift balance.
+- The generic stick-figure scene art, weak room context and sparse subject evidence still need a separate original art-direction milestone and actual visual-gate review.
+
+Rollback: revert the eight implementation commits above on this existing PR branch. No merge or deployment.
