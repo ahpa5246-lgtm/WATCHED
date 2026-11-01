@@ -235,7 +235,6 @@ test('keyboard-only operator can switch cameras and inspect a visible subject wi
   await expect(subjectPicker).toBeFocused();
   await expect(subjectPicker).toHaveAccessibleName('الأشخاص الظاهرون');
   await page.keyboard.press('ArrowDown');
-  await page.keyboard.press('Enter');
   await expect(subjectPicker).toHaveValue('S-203');
   await expect(page.locator('#subjectName')).toHaveText('Aya');
   await expect(page.locator('#subjectId')).toHaveText('S-203');
