@@ -63,8 +63,9 @@ body.reduce-motion .rec i { animation: none; }
 .meter-block strong { font-size: 11px; color: var(--soft); min-width: 35px; text-align: right; }
 .objective { min-width: 0; color: var(--soft); font-size: 12px; line-height: 1.45; border-left: 1px solid var(--line); padding-left: 14px; }
 
-.side-panel { min-height: 0; display: grid; grid-template-rows: auto auto minmax(160px, 1fr); gap: 12px; }
+.side-panel { position: relative; min-height: 0; display: grid; grid-template-rows: auto auto minmax(160px, 1fr); gap: 12px; }
 .side-panel > section { padding: 12px; min-width: 0; overflow: hidden; }
+#operatorAnnouncement { top: 0; left: 0; }
 .camera-buttons { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; margin-top: 10px; }
 .cam-btn { min-height: 54px; padding: 8px; border: 1px solid #303030; background: #121212; color: var(--soft); text-align: left; }
 .cam-btn span { display: block; font-size: 10px; color: var(--muted); margin-top: 3px; }
