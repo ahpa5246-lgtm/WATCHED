@@ -259,3 +259,17 @@ The earlier mixed-direction-subject-ID item is superseded by this tested change.
 - The manual Pages workflow is intentionally not executed because it performs deployment, which is outside this authorization.
 
 Keep PR #2 Draft. No merge or deployment.
+
+
+### Current-head validation — 2026-11-02
+- Implementation commit: `abaffee59943aeafa6e70c3ed039cac4caca840a`.
+- Push CI [41365995067](https://github.com/ahpa5246-lgtm/WATCHED/actions/runs/41365995067) and PR CI [41366000783](https://github.com/ahpa5246-lgtm/WATCHED/actions/runs/41366000783) both completed successfully on the exact implementation commit.
+- The PR verify job used checkout v7, setup-node v7 and upload-artifact v7; its log contains no Node.js 20 action-runtime deprecation warning for the migrated actions.
+- `npm ci`: 0 vulnerabilities. JavaScript syntax checks passed. Node suite: 13 passed, 0 failed. Production build passed.
+- Playwright: 16 passed, 2 intentional project skips across the desktop 1280×900 and narrow 760×900 projects; the 320×720 Arabic/RTL acceptance ran within the narrow project.
+- Artifact [13106809316](https://github.com/ahpa5246-lgtm/WATCHED/actions/runs/41366000783/artifacts/13106809316), 815,596 bytes, SHA-256 `f6e24df3a0e1e2d0cf42f475d3618f278120473afb963d60778942c7fa873518`, is bound to the tested implementation commit. I downloaded it and inspected the 320×720 Arabic operator frame and desktop keyboard-selection capture. The narrow view keeps the subject controls reachable and has no horizontal overflow; the desktop scene still uses generic stick figures.
+- Official release references inspected: [checkout v7](https://github.com/actions/checkout/releases/tag/v7.0.1), [setup-node v7](https://github.com/actions/setup-node/releases/tag/v7.1.0), [upload-artifact v7](https://github.com/actions/upload-artifact/releases/tag/v7.0.2), [configure-pages v6](https://github.com/actions/configure-pages/releases/tag/v6.0.0), [upload-pages-artifact v5](https://github.com/actions/upload-pages-artifact/releases/tag/v5.0.0), and [deploy-pages v5](https://github.com/actions/deploy-pages/releases/tag/v5.0.1). The first-party action metadata declares Node 24 for the JavaScript actions; upload-pages-artifact v5 is a composite wrapper around upload-artifact v7.
+- The Pages workflow remains manual and was not dispatched. No deployment occurred.
+
+### Final scope decision
+This closes the CI action-runtime warning only. It does not alter the app's Node 20 minimum, gameplay, UI, or data. The visual-quality gate remains blocked by generic scene art and unverified manual screen-reader/200% zoom review. Keep PR #2 Draft; no merge or deployment.
