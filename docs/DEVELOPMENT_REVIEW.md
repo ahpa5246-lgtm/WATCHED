@@ -255,7 +255,7 @@ The earlier mixed-direction-subject-ID item is superseded by this tested change.
 - Manual NVDA/VoiceOver output, 200% zoom, broader mixed-direction copy, and six-shift balance remain unverified.
 
 ### Validation
-- Pending the new PR CI run on the action-migration commit. Do not mark this milestone complete until the verify job passes and its log no longer reports Node 20 action-runtime deprecation for the migrated actions.
+- Resolved by PR CI [41366000783](https://github.com/ahpa5246-lgtm/WATCHED/actions/runs/41366000783) on implementation commit `abaffee59943aeafa6e70c3ed039cac4caca840a`: the verify job passed, and its log contains no Node.js 20 action-runtime deprecation warning for the migrated actions. Test counts and screenshot evidence are recorded below.
 - The manual Pages workflow is intentionally not executed because it performs deployment, which is outside this authorization.
 
 Keep PR #2 Draft. No merge or deployment.
