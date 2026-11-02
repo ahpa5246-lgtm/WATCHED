@@ -20,6 +20,7 @@ test('Arabic operator can complete inspection, pause, and settings at a 200%-equ
       viewportWidth: document.documentElement.clientWidth,
       viewportHeight: document.documentElement.clientHeight,
       documentWidth: document.documentElement.scrollWidth,
+      documentHeight: document.documentElement.scrollHeight,
       windowScrollY: window.scrollY,
       appShell: {
         height: appShell.getBoundingClientRect().height,
@@ -33,6 +34,7 @@ test('Arabic operator can complete inspection, pause, and settings at a 200%-equ
   expect(initialGeometry.viewportWidth).toBe(640);
   expect(initialGeometry.viewportHeight).toBe(450);
   expect(initialGeometry.documentWidth).toBeLessThanOrEqual(initialGeometry.viewportWidth);
+  expect(initialGeometry.documentHeight).toBeLessThanOrEqual(initialGeometry.viewportHeight);
   expect(initialGeometry.windowScrollY).toBe(0);
   expect(initialGeometry.appShell.height).toBe(450);
   expect(initialGeometry.appShell.overflow).toBe('hidden');
@@ -51,6 +53,8 @@ test('Arabic operator can complete inspection, pause, and settings at a 200%-equ
   );
   expect(visiblePanels.length).toBeGreaterThanOrEqual(4);
   expect(visiblePanels.every((rect) => rect.left >= -1 && rect.right <= 641)).toBe(true);
+
+  await page.screenshot({ path: testInfo.outputPath('zoom-200-arabic-monitor.png'), fullPage: true });
 
   const consoleGrid = page.locator('.console-grid');
   const consoleGeometry = await consoleGrid.evaluate((element) => ({
@@ -103,6 +107,7 @@ test('Arabic operator can complete inspection, pause, and settings at a 200%-equ
   await page.keyboard.press('Enter');
   const settings = page.locator('#settingsOverlay');
   await expect(settings).toBeVisible();
+  await page.screenshot({ path: testInfo.outputPath('zoom-200-arabic-settings.png'), fullPage: true });
 
   const settingsModal = settings.locator('.modal');
   const settingsBounds = await settingsModal.boundingBox();
