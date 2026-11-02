@@ -233,3 +233,29 @@ The existing 320×720 Arabic operator journey selected subject Aya with identifi
 - This milestone improves directionality of operational identifiers only. It does not change the procedural scene art or information architecture. The feed still uses generic figures and geometric rooms; the original scene-art direction, manual NVDA/VoiceOver output, 200% zoom, mixed Arabic/Latin content beyond subject IDs, complete six-shift balance, and full visual-quality gate remain open. No visual-parity or WCAG-conformance claim is made.
 
 The earlier mixed-direction-subject-ID item is superseded by this tested change. Keep PR #2 Draft; no merge or deployment.
+
+
+## 2026-11-02 — migrate GitHub Actions to Node 24-compatible releases
+
+### Failure-first evidence
+- The current PR #2 head before this milestone was `241af5d85d96c204dc38ade845cd4637fdccc6e4`.
+- CI run [41363581959](https://github.com/ahpa5246-lgtm/WATCHED/actions/runs/41363581959) passed the application checks, but its job log emitted a Node.js 20 deprecation warning for `actions/checkout@v4`, `actions/setup-node@v4`, and `actions/upload-artifact@v4`. This is a toolchain warning, not an application-test failure.
+- The manual Pages workflow also retained older action majors: checkout v4, setup-node v4, configure-pages v5, upload-pages-artifact v3, and deploy-pages v4.
+
+### Bounded maintenance change
+- CI now uses `actions/checkout@v7`, `actions/setup-node@v7`, and `actions/upload-artifact@v7`.
+- The manually triggered Pages workflow now uses `actions/configure-pages@v6`, `actions/upload-pages-artifact@v5`, and `actions/deploy-pages@v5`, alongside checkout/setup-node v7.
+- Official action metadata was inspected at the release tags: checkout v7, setup-node v7, upload-artifact v7, configure-pages v6, and deploy-pages v5 declare `runs.using: node24`; upload-pages-artifact v5 is composite and invokes upload-artifact v7.0.0.
+- The application runtime remains Node 20 in CI and the package engine remains `>=20`; this milestone changes JavaScript action runtimes only, not the app's supported Node range.
+- The Pages workflow remains `workflow_dispatch` only. It was not run; no Pages build/deploy or publication was triggered.
+
+### Product and visual review
+- Downloaded and inspected the current-head browser artifact [13106356130](https://github.com/ahpa5246-lgtm/WATCHED/actions/runs/41363427343/artifacts/13106356130), including the 320×720 Arabic operator frame and 1280×900 desktop keyboard-selection capture.
+- The existing direct-product comparison remains Papers, Please and Beholder, with inkle as an aspirational narrative reference. The screenshots still show generic stick figures and sparse room context; this CI-only milestone does not close that visual gap or pass the visual-quality gate.
+- Manual NVDA/VoiceOver output, 200% zoom, broader mixed-direction copy, and six-shift balance remain unverified.
+
+### Validation
+- Pending the new PR CI run on the action-migration commit. Do not mark this milestone complete until the verify job passes and its log no longer reports Node 20 action-runtime deprecation for the migrated actions.
+- The manual Pages workflow is intentionally not executed because it performs deployment, which is outside this authorization.
+
+Keep PR #2 Draft. No merge or deployment.
