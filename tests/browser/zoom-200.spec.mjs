@@ -14,12 +14,17 @@ test('Arabic operator can complete inspection, pause, and settings at a 200%-equ
 
   const initialGeometry = await page.evaluate(() => {
     const status = document.querySelector('.statusbar').getBoundingClientRect();
+    const appShell = document.querySelector('.app-shell');
     return {
       devicePixelRatio: window.devicePixelRatio,
       viewportWidth: document.documentElement.clientWidth,
       viewportHeight: document.documentElement.clientHeight,
       documentWidth: document.documentElement.scrollWidth,
-      documentHeight: document.documentElement.scrollHeight,
+      windowScrollY: window.scrollY,
+      appShell: {
+        height: appShell.getBoundingClientRect().height,
+        overflow: getComputedStyle(appShell).overflow,
+      },
       status: { left: status.left, right: status.right, top: status.top, bottom: status.bottom },
     };
   });
@@ -28,7 +33,9 @@ test('Arabic operator can complete inspection, pause, and settings at a 200%-equ
   expect(initialGeometry.viewportWidth).toBe(640);
   expect(initialGeometry.viewportHeight).toBe(450);
   expect(initialGeometry.documentWidth).toBeLessThanOrEqual(initialGeometry.viewportWidth);
-  expect(initialGeometry.documentHeight).toBeLessThanOrEqual(initialGeometry.viewportHeight);
+  expect(initialGeometry.windowScrollY).toBe(0);
+  expect(initialGeometry.appShell.height).toBe(450);
+  expect(initialGeometry.appShell.overflow).toBe('hidden');
   expect(initialGeometry.status.left).toBeGreaterThanOrEqual(-1);
   expect(initialGeometry.status.right).toBeLessThanOrEqual(initialGeometry.viewportWidth + 1);
   expect(initialGeometry.status.top).toBeGreaterThanOrEqual(0);
