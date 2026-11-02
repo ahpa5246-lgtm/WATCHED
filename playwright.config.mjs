@@ -16,6 +16,11 @@ export default defineConfig({
   projects: [
     { name: 'desktop-1280', use: { viewport: { width: 1280, height: 900 } } },
     { name: 'narrow-760', use: { viewport: { width: 760, height: 900 } } },
+    {
+      name: 'zoom-200-equivalent',
+      testMatch: /zoom-200\.spec\.mjs/,
+      use: { viewport: { width: 640, height: 450 }, deviceScaleFactor: 2 },
+    },
   ],
   webServer: {
     command: 'npm run dev',
