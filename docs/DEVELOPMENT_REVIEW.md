@@ -273,3 +273,31 @@ Keep PR #2 Draft. No merge or deployment.
 
 ### Final scope decision
 This closes the CI action-runtime warning only. It does not alter the app's Node 20 minimum, gameplay, UI, or data. The visual-quality gate remains blocked by generic scene art and unverified manual screen-reader/200% zoom review. Keep PR #2 Draft; no merge or deployment.
+
+
+## 2026-11-02 — 200%-equivalent Arabic operator journey and live-region overflow correction
+
+### Failure-first evidence
+- Added a dedicated Chromium project using a 640×450 CSS viewport at device-pixel-ratio 2 (1280×900 physical pixels). This is a zoom-equivalent reflow context, not a manual browser/OS zoom test.
+- Initial CI [41396414870](https://github.com/ahpa5246-lgtm/WATCHED/actions/runs/41396414870) exposed a real document-height issue: at 640×450, `documentElement.scrollHeight` was 531 CSS px even though the status bar remained visible and there was no horizontal overflow. The failure artifact showed an unnecessary 81 CSS px page tail.
+- The hidden `#operatorAnnouncement` live region used absolute positioning without a positioned containing block. Its static position could extend the root scroll area below the fixed-height application shell.
+
+### Bounded correction and tested journey
+- Anchored the live region to its own panel: `.side-panel` is now positioned, and `#operatorAnnouncement` is placed at its top-left while retaining the existing `.sr-only`, `role="status"`, `aria-live="polite"` and `aria-atomic="true"` semantics.
+- Added the `zoom-200-equivalent` Playwright project (640×450 CSS, DPR 2) and a dedicated Arabic operator journey. It starts a shift, selects the cafe camera, selects subject S-203/Aya, enables focus with E, checks the Arabic live-region messages, scrolls to the event log, pauses with Escape, opens Settings, tabs through language/volume/scanlines/reduced-motion/Close, returns to Pause, and resumes.
+- The acceptance asserts no horizontal or vertical document overflow, a 450 CSS px application shell with hidden outer overflow, a visible status bar, in-bounds panels and settings dialog, reachable event log, and keyboard focus/activation on the actual controls.
+- Captures now include the monitor, subject-inspection, settings and resumed-session states. The application remains a single surveillance task flow with a separate settings dialog; no extra page was introduced.
+
+### Exact-head verification
+- CSS correction commit: `4b527889c8ef2fb71055fe827b8eedba2219d19d`; its CI [41396854639](https://github.com/ahpa5246-lgtm/WATCHED/actions/runs/41396854639) passed.
+- Final browser-acceptance commit: `6279df5258e8fd5b844e04fd8d358904f69932f6`.
+- PR CI [41396980961](https://github.com/ahpa5246-lgtm/WATCHED/actions/runs/41396980961) passed on that exact head. `npm ci` reported 0 vulnerabilities; JavaScript syntax checks and production build passed; Node suite: 13 passed, 0 failed; Playwright: 17 passed and 4 intentional project skips across desktop 1280×900, narrow 760×900, and the new 640×450/DPR-2 project.
+- Artifact [13118984202](https://github.com/ahpa5246-lgtm/WATCHED/actions/runs/41396980961/artifacts/13118984202) is 991,934 bytes, SHA-256 `0b3474bc49c8ede33be7adf6c6b5e7d3a82e844d0c30aa6fd630cadcec8850e4`. I downloaded and inspected all four new 1280×900 captures. The strict document-height assertion passed; the previous 1280×1062 full-page capture is now 1280×900, with no extra document tail.
+
+### Comparative review and remaining gaps
+- Rechecked the released [Papers, Please](https://www.papersplea.se/) official site and [Beholder](https://store.steampowered.com/app/475550/Beholder) Steam product page as the two direct surveillance/inspection-game references, and [inkle](https://www.inklestudios.com/) as the official interactive-narrative reference. The comparison remains task-based: one dominant observation surface, concise subject/context controls, and readable consequence/event history. No third-party art, logos or layouts were copied.
+- The current narrow/zoom-equivalent screenshots show that the camera and subject controls remain reachable by keyboard and the Settings path remains operable. The generic stick figures and sparse room environments remain a substantial visual/content gap compared with the published games; this test-only/containment milestone does not close that gap or pass the visual-quality gate.
+- Still open: manual NVDA/VoiceOver output, real browser/OS zoom testing, six-shift balance, mixed Arabic/Latin content beyond the subject identifiers, original scene art, and the full visual-quality review. No WCAG-conformance or visual-parity claim is made.
+- This milestone changes CSS positioning for the hidden live region plus browser test/configuration only; simulation/gameplay rules and scene artwork did not change.
+
+Keep PR #2 Draft. No merge or deployment.
