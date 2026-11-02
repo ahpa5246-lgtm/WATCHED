@@ -18,6 +18,7 @@ The game never declares a single moral answer. Some observation prevents real ha
 - `F` flags the selected subject for intervention.
 - `Esc` pauses.
 - Progress auto-saves locally every few seconds. No account or telemetry is used.
+- Invalid, unsupported, or completed local records are ignored instead of opening a broken session.
 
 A full run is designed for roughly 12–18 minutes depending on reading and play style.
 

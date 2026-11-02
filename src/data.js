@@ -146,8 +146,9 @@ export const EVENT_TEXT = {
 export const TRANSLATIONS = {
   en: {
     pause: 'PAUSE', settings: 'SETTINGS', order: 'ORDER', coverage: 'COVERAGE', cameras: 'CAMERAS', subject: 'SUBJECT',
-    selectSubject: 'Select a visible subject.', status: 'STATUS', attention: 'ATTENTION', risk: 'SYSTEM RISK', focus: 'FOCUS [E]', flag: 'FLAG [F]',
-    systemLog: 'SYSTEM LOG', hint: 'Click a subject to inspect. E focuses. F flags.', tagline: 'Observation changes behavior. Your task is to decide how much change is acceptable.',
+    visibleSubjects: 'VISIBLE SUBJECTS', noVisibleSubjects: 'NO VISIBLE SUBJECTS',
+    selectSubject: 'Choose a visible subject from the list or camera feed.', status: 'STATUS', attention: 'ATTENTION', risk: 'SYSTEM RISK', focus: 'FOCUS [E]', flag: 'FLAG [F]',
+    systemLog: 'SYSTEM LOG', hint: 'Choose from the subject list or camera feed. E focuses. F flags.', tagline: 'Observation changes behavior. Your task is to decide how much change is acceptable.',
     contentNote: 'Content note: surveillance, social pressure, implied petty crime. No gore.', newGame: 'NEW SHIFT', continue: 'CONTINUE',
     privacyLine: 'No account. No telemetry. Progress stays on this device.', begin: 'BEGIN', paused: 'SESSION PAUSED', pauseTitle: 'Observation suspended.',
     resume: 'RESUME', quit: 'SAVE & EXIT', operatorPreferences: 'Operator preferences', language: 'Language', volume: 'Volume', scanlines: 'CRT scanlines',
@@ -158,8 +159,9 @@ export const TRANSLATIONS = {
   },
   ar: {
     pause: 'إيقاف مؤقت', settings: 'الإعدادات', order: 'النظام', coverage: 'التغطية', cameras: 'الكاميرات', subject: 'الشخص',
-    selectSubject: 'اختر شخصًا ظاهرًا في الكاميرا.', status: 'الحالة', attention: 'الانتباه', risk: 'تقدير الخطر', focus: 'تركيز [E]', flag: 'إبلاغ [F]',
-    systemLog: 'سجل النظام', hint: 'انقر على شخص لفحصه. E للتركيز. F للإبلاغ.', tagline: 'المراقبة تغيّر السلوك. مهمتك أن تقرر مقدار التغيير المقبول.',
+    visibleSubjects: 'الأشخاص الظاهرون', noVisibleSubjects: 'لا يوجد أشخاص ظاهرون',
+    selectSubject: 'اختر شخصًا من القائمة أو من مشهد الكاميرا.', status: 'الحالة', attention: 'الانتباه', risk: 'تقدير الخطر', focus: 'تركيز [E]', flag: 'إبلاغ [F]',
+    systemLog: 'سجل النظام', hint: 'اختر شخصًا من القائمة أو من المشهد. E للتركيز. F للإبلاغ.', tagline: 'المراقبة تغيّر السلوك. مهمتك أن تقرر مقدار التغيير المقبول.',
     contentNote: 'تنبيه محتوى: مراقبة، ضغط اجتماعي، وإيحاء بجرائم بسيطة. لا يوجد عنف دموي.', newGame: 'وردية جديدة', continue: 'متابعة',
     privacyLine: 'لا حسابات ولا تتبع. التقدم محفوظ على هذا الجهاز فقط.', begin: 'ابدأ', paused: 'الجلسة متوقفة', pauseTitle: 'أوقفت المراقبة مؤقتًا.',
     resume: 'متابعة', quit: 'حفظ وخروج', operatorPreferences: 'تفضيلات المُشغِّل', language: 'اللغة', volume: 'الصوت', scanlines: 'خطوط شاشة CRT',
